@@ -702,15 +702,17 @@ pub fn from_week_parts(
 //     { year = y
 //     , ordinalDay = rd - daysBeforeYear y
 //     }
-//- toOrdinalDate : Date -> { year : Int, ordinalDay : Int }
-//- toOrdinalDate (RD rd) =
-//-     let
-//-         y =
-//-             year (RD rd)
-//-     in
-//-     { year = y
-//-     , ordinalDay = rd - daysBeforeYear y
-//-     }
+pub type OrdinalDate {
+  OrdinalDate(year: Int, ordinal_day: Int)
+}
+
+pub fn to_ordinal_date(date: Date) -> OrdinalDate {
+  let RD(rd) = date
+  let year_ = year(date)
+
+  OrdinalDate(year: year_, ordinal_day: rd - days_before_year(year_))
+}
+
 // 
 // 
 // {-| -}
@@ -721,13 +723,16 @@ pub fn from_week_parts(
 //             RD rd |> toOrdinalDate
 //     in
 //     toCalendarDateHelp date.year Jan date.ordinalDay
-//- toCalendarDate : Date -> { year : Int, month : Month, day : Int }
-//- toCalendarDate (RD rd) =
-//-     let
-//-         date =
-//-             RD rd |> toOrdinalDate
-//-     in
-//-      toCalendarDateHelp date.year Jan date.ordinalDay
+pub type CalendarDate {
+  CalendarDate(year: Int, month: Month, day: Int)
+}
+
+pub fn to_calendar_date(date: Date) -> CalendarDate {
+  let ordinal_date = to_ordinal_date(date)
+
+  to_calendar_date_helper(ordinal_date.year, Jan, ordinal_date.ordinal_day)
+}
+
 // 
 // 
 // toCalendarDateHelp : Int -> Month -> Int -> { year : Int, month : Month, day : Int }
@@ -747,6 +752,28 @@ pub fn from_week_parts(
 //         , month = m
 //         , day = d
 //         }
+fn to_calendar_date_helper(
+  year: Int,
+  month: Month,
+  ordinal_day: Int,
+) -> CalendarDate {
+  let month_days = days_in_month(year, month)
+  let month_number = month_to_number(month)
+
+  case month_number < 12 && ordinal_day > month_days {
+    True -> {
+      to_calendar_date_helper(
+        year,
+        number_to_month(month_number + 1),
+        ordinal_day - month_days,
+      )
+    }
+    False -> {
+      CalendarDate(year: year, month: month, day: ordinal_day)
+    }
+  }
+}
+
 // 
 // 
 // {-| -}
@@ -767,6 +794,24 @@ pub fn from_week_parts(
 //     , weekNumber = 1 + (rd - week1Day1) // 7
 //     , weekday = wdn |> numberToWeekday
 //     }
+
+pub type WeekDate {
+  WeekDate(week_year: Int, week_number: Int, weekday: Weekday)
+}
+
+pub fn to_week_date(date: Date) {
+  let RD(rd) = date
+  let weekday_number_ = weekday_number(date)
+  let week_year = year(RD(rd + { 4 - weekday_number_ }))
+  let week_1_day_1 = days_before_week_year(week_year + 1)
+
+  WeekDate(
+    week_year: week_year,
+    week_number: 1 + { rd - week_1_day_1 },
+    weekday: number_to_weekday(weekday_number_),
+  )
+}
+
 // 
 // 
 // 
@@ -778,6 +823,10 @@ pub fn from_week_parts(
 // ordinalDay : Date -> Int
 // ordinalDay =
 //     toOrdinalDate >> .ordinalDay
+pub fn ordinal_day(date: Date) -> Int {
+  to_ordinal_date(date).ordinal_day
+}
+
 // 
 // 
 // {-| The month as a [`Month`](https://package.elm-lang.org/packages/elm/time/latest/Time#Month)
@@ -786,6 +835,10 @@ pub fn from_week_parts(
 // month : Date -> Month
 // month =
 //     toCalendarDate >> .month
+pub fn month(date: Date) -> Month {
+  to_calendar_date(date).month
+}
+
 // 
 // 
 // {-| The month number (1–12).
@@ -793,6 +846,12 @@ pub fn from_week_parts(
 // monthNumber : Date -> Int
 // monthNumber =
 //     month >> monthToNumber
+pub fn month_number(date: Date) -> Int {
+  date
+  |> month
+  |> month_to_number
+}
+
 // 
 // 
 // {-| The quarter of the year (1–4).
@@ -800,6 +859,12 @@ pub fn from_week_parts(
 // quarter : Date -> Int
 // quarter =
 //     month >> monthToQuarter
+pub fn quarter(date: Date) -> Int {
+  date
+  |> month
+  |> month_to_quarter
+}
+
 // 
 // 
 // {-| The day of the month (1–31).
@@ -807,6 +872,10 @@ pub fn from_week_parts(
 // day : Date -> Int
 // day =
 //     toCalendarDate >> .day
+pub fn day(date: Date) -> Int {
+  to_calendar_date(date).day
+}
+
 // 
 // 
 // {-| The ISO week-numbering year. This is not always the same as the
@@ -815,6 +884,10 @@ pub fn from_week_parts(
 // weekYear : Date -> Int
 // weekYear =
 //     toWeekDate >> .weekYear
+pub fn week_year(date: Date) -> Int {
+  to_week_date(date).week_year
+}
+
 // 
 // 
 // {-| The ISO week number of the year (1–53).
@@ -822,6 +895,10 @@ pub fn from_week_parts(
 // weekNumber : Date -> Int
 // weekNumber =
 //     toWeekDate >> .weekNumber
+pub fn week_number(date: Date) -> Int {
+  to_week_date(date).week_number
+}
+
 // 
 // 
 // {-| The weekday as a [`Weekday`](https://package.elm-lang.org/packages/elm/time/latest/Time#Weekday)
@@ -829,7 +906,13 @@ pub fn from_week_parts(
 // -}
 // weekday : Date -> Weekday
 // weekday =
-//     weekdayNumber >> numberToWeekday
+// //     weekdayNumber >> numberToWeekday
+pub fn weekday(date: Date) -> Weekday {
+  date
+  |> weekday_number
+  |> number_to_weekday
+}
+
 // 
 // 
 // 
@@ -839,11 +922,20 @@ pub fn from_week_parts(
 // monthToQuarter : Month -> Int
 // monthToQuarter m =
 //     (monthToNumber m + 2) // 3
+fn month_to_quarter(month: Month) -> Int {
+  { month_to_number(month) + 2 } / 3
+}
+
 // 
 // 
 // quarterToMonth : Int -> Month
 // quarterToMonth q =
 //     q * 3 - 2 |> numberToMonth
+fn quarter_to_month(quarter: Int) -> Month {
+  quarter * 3 - 2
+  |> number_to_month
+}
+
 // 
 // 
 // 
@@ -2023,6 +2115,24 @@ fn days_before_month(year: Int, month: Month) -> Int {
 // 
 //         Dec ->
 //             12
+
+pub fn month_to_number(month: Month) -> Int {
+  case month {
+    Jan -> 1
+    Feb -> 2
+    Mar -> 3
+    Apr -> 4
+    May -> 5
+    Jun -> 6
+    Jul -> 7
+    Aug -> 8
+    Sep -> 9
+    Oct -> 10
+    Nov -> 11
+    Dec -> 12
+  }
+}
+
 // 
 // 
 // {-| Maps 1–12 to `Jan`–`Dec`.
@@ -2146,6 +2256,18 @@ fn weekday_to_number(weekday: Weekday) -> Int {
 // 
 //         _ ->
 //             Sun
+pub fn number_to_weekday(weekday_number: Int) -> Weekday {
+  case int.max(1, weekday_number) {
+    1 -> Mon
+    2 -> Tue
+    3 -> Wed
+    4 -> Thu
+    5 -> Fri
+    6 -> Sat
+    _ -> Sun
+  }
+}
+
 // 
 // 
 // 
