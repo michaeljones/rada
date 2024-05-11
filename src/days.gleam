@@ -951,6 +951,17 @@ fn quarter_to_month(quarter: Int) -> Month {
 //     , weekdayNameShort : Weekday -> String
 //     , dayWithSuffix : Int -> String
 //     }
+
+pub type Language {
+  Language(
+    month_name: fn(Month) -> String,
+    month_name_short: fn(Month) -> String,
+    weekday_name: fn(Weekday) -> String,
+    weekday_name_short: fn(Weekday) -> String,
+    day_with_suffix: fn(Int) -> String,
+  )
+}
+
 // 
 // 
 // formatField : Language -> Char -> Int -> Date -> String
@@ -1092,6 +1103,166 @@ fn quarter_to_month(quarter: Int) -> Month {
 // 
 //         _ ->
 //             ""
+// formatField : Language -> Char -> Int -> Date -> String
+// formatField language char length date =
+fn format_field(language: Language, char: String, length: Int, date: Date) -> String {
+    case char {
+        "y" ->
+            case length {
+                2 ->
+                    date |> year |> int.to_string |> string.pad_left(2, "0") |> string_take_right(2)
+
+                _ ->
+                    date |> year |> padSignedInt length
+                    }
+
+        "Y" ->
+            case length {
+                2 ->
+                    date |> weekYear |> int.to_string |> string.pad_left( 2, "0") |> String.right 2
+
+                _ ->
+                    date |> weekYear |> padSignedInt length
+                    }
+
+        "Q" ->
+            case length {
+                1 ->
+                    date |> quarter |> int.to_string
+
+                2 ->
+                    date |> quarter |> int.to_string
+
+                3 ->
+                    date |> quarter |> int.to_string |> (++) "Q"
+
+                4 ->
+                    date |> quarter |> withOrdinalSuffix
+
+                5 ->
+                    date |> quarter |> int.to_string
+
+                _ ->
+                    ""
+                    }
+
+        "M" ->
+            case length {
+                1 ->
+                    date |> monthNumber |> int.to_string
+
+                2 ->
+                    date |> monthNumber |> int.to_string |> String.padLeft 2 "0"
+
+                3 ->
+                    date |> month |> language.month_name_short
+
+                4 ->
+                    date |> month |> language.month_name
+
+                5 ->
+                    date |> month |> language.month_name_short |> String.left 1
+
+                _ ->
+                    ""
+
+                    }
+        "w" ->
+            case length {
+                1 ->
+                    date |> weekNumber |> int.to_string
+
+                2 ->
+                    date |> weekNumber |> int.to_string |> String.padLeft 2 "0"
+
+                _ ->
+                    ""
+                    }
+
+        "d" ->
+            case length {
+                1 ->
+                    date |> day |> int.to_string
+
+                2 ->
+                    date |> day |> int.to_string |> String.padLeft 2 "0"
+
+                // non-standard
+                3 ->
+                    date |> day |> language.dayWithSuffix
+
+                _ ->
+                    ""
+                    }
+
+        "D" ->
+            case length {
+                1 ->
+                    date |> ordinalDay |> int.to_string
+
+                2 ->
+                    date |> ordinalDay |> int.to_string |> String.padLeft 2 "0"
+
+                3 ->
+                    date |> ordinalDay |> int.to_string |> String.padLeft 3 "0"
+
+                _ ->
+                    ""
+                    }
+
+        "E" ->
+            case length {
+                // abbreviated
+                1 ->
+                    date |> weekday |> language.weekday_name_short
+
+                2 ->
+                    date |> weekday |> language.weekday_name_short
+
+                3 ->
+                    date |> weekday |> language.weekday_name_short
+
+                // full
+                4 ->
+                    date |> weekday |> language.weekday_name
+
+                // narrow
+                5 ->
+                    date |> weekday |> language.weekday_name_short |> String.left 1
+
+                // short
+                6 ->
+                    date |> weekday |> language.weekday_name_short |> String.left 2
+
+                _ ->
+                    ""
+                    }
+
+        "e" ->
+            case length {
+                1 ->
+                    date |> weekday_number |> int.to_string
+
+                2 ->
+                    date |> weekday_number |> int.to_string
+
+                _ ->
+                    date |> format_field language "E" length
+                    }
+
+        _ ->
+            ""
+            }
+} 
+
+fn string_take_right(string: String, count: Int) -> String {
+  string.slice(from: string, at_index: -1 * count, length: count)
+}
+
+fn string_take_left(string: String, count: Int) -> String {
+  string.slice(from: string, at_index: 0, length: count)
+}
+
 // 
 // 
 // {-| Expects `tokens` list reversed for foldl.
