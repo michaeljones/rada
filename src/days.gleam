@@ -537,18 +537,18 @@ pub fn from_calendar_parts(
 ) -> Result(Date, String) {
   case
     is_between_int(month_number, 1, 12),
-    is_between_int(day, 1, days_in_month(year, number_to_month(number_number)))
+    is_between_int(day, 1, days_in_month(year, number_to_month(month_number)))
   {
     False, _ -> {
       Error(
         "Invalid date: "
-        <> { "month " <> int.to_string(mn) <> " is out of range" }
+        <> { "month " <> int.to_string(month_number) <> " is out of range" }
         <> " (1 to 12)"
         <> {
           "; received (year "
-          <> int.to_string(y)
+          <> int.to_string(year)
           <> ", month "
-          <> int.to_string(mn)
+          <> int.to_string(month_number)
           <> ", day "
           <> int.to_string(day)
           <> ")"
@@ -558,7 +558,7 @@ pub fn from_calendar_parts(
     True, False -> {
       Error(
         "Invalid date: "
-        <> { "day " <> int.to_string(d) <> " is out of range" }
+        <> { "day " <> int.to_string(day) <> " is out of range" }
         <> {
           " (1 to "
           <> int.to_string(days_in_month(year, number_to_month(month_number)))
@@ -569,22 +569,22 @@ pub fn from_calendar_parts(
           <> {
             month_number
             |> number_to_month
-            |> month_to_nme
+            |> month_to_name
           }
         }
         <> {
-          case mn == 2 && d == 29 {
-            True -> " (" <> int.to_string(y) <> " is not a leap year)"
+          case month_number == 2 && day == 29 {
+            True -> " (" <> int.to_string(year) <> " is not a leap year)"
             False -> ""
           }
         }
         <> {
           "; received (year "
-          <> int.to_string(y)
+          <> int.to_string(year)
           <> ", month "
-          <> int.to_string(mn)
+          <> int.to_string(month_number)
           <> ", day "
-          <> int.to_string(d)
+          <> int.to_string(day)
           <> ")"
         },
       )
@@ -645,16 +645,16 @@ pub fn from_week_parts(
     False, _ -> {
       Error(
         "Invalid week date: "
-        <> { "week " <> int.to_string(wn) <> " is out of range" }
+        <> { "week " <> int.to_string(week_number) <> " is out of range" }
         <> { " (1 to " <> int.to_string(weeks_in_year) <> ")" }
-        <> { " for " <> int.to_string(wy) }
+        <> { " for " <> int.to_string(week_year) }
         <> {
           "; received (year "
-          <> int.to_string(wy)
+          <> int.to_string(week_year)
           <> ", week "
-          <> int.to_string(wn)
+          <> int.to_string(week_number)
           <> ", weekday "
-          <> int.to_string(wdn)
+          <> int.to_string(weekday_number)
           <> ")"
         },
       )
@@ -662,15 +662,15 @@ pub fn from_week_parts(
     True, False -> {
       Error(
         "Invalid week date: "
-        <> { "weekday " <> int.to_string(wdn) <> " is out of range" }
+        <> { "weekday " <> int.to_string(weekday_number) <> " is out of range" }
         <> " (1 to 7)"
         <> {
           "; received (year "
-          <> int.to_string(wy)
+          <> int.to_string(week_year)
           <> ", week "
-          <> int.to_string(wn)
+          <> int.to_string(week_number)
           <> ", weekday "
-          <> int.to_string(wdn)
+          <> int.to_string(weekday_number)
           <> ")"
         },
       )
@@ -1080,6 +1080,23 @@ pub fn from_week_parts(
 // 
 //         Dec ->
 //             "December"
+fn month_to_name(month: Month) -> String {
+  case month {
+    Jan -> "January"
+    Feb -> "February"
+    Mar -> "March"
+    Apr -> "April"
+    May -> "May"
+    Jun -> "June"
+    Jul -> "July"
+    Aug -> "August"
+    Sep -> "September"
+    Oct -> "October"
+    Nov -> "November"
+    Dec -> "December"
+  }
+}
+
 // 
 // 
 // weekdayToName : Weekday -> String
@@ -2048,8 +2065,23 @@ fn days_before_month(year: Int, month: Month) -> Int {
 // 
 //         _ ->
 //             Dec
-// 
-// 
+fn number_to_month(month_number: Int) -> Month {
+  case int.max(1, month_number) {
+    1 -> Jan
+    2 -> Feb
+    3 -> Mar
+    4 -> Apr
+    5 -> May
+    6 -> Jun
+    7 -> Jul
+    8 -> Aug
+    9 -> Sep
+    10 -> Oct
+    11 -> Nov
+    _ -> Dec
+  }
+}
+
 // {-| Maps `Mon`–`Sun` to 1-7.
 // -}
 // weekdayToNumber : Weekday -> Int
