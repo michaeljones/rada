@@ -1,7 +1,10 @@
 import gleam/bool
 import gleam/int
+import gleam/list
 import gleam/result
 import gleam/string
+
+import days/pattern.{type Token, Field, Literal}
 
 // module Date exposing
 
@@ -1352,6 +1355,22 @@ fn string_take_left(str: String, count: Int) -> String {
 //         )
 //         ""
 //         tokens
+fn format_with_tokens(
+  language: Language,
+  tokens: List(Token),
+  date: Date,
+) -> String {
+  list.fold(tokens, "", fn(formatted, token) {
+    case token {
+      Field(char, length) -> {
+        format_field(date, language, char, length) <> formatted
+      }
+      Literal(str) -> {
+        str <> formatted
+      }
+    }
+  })
+}
 
 // 
 // 
@@ -1372,6 +1391,19 @@ fn string_take_left(str: String, count: Int) -> String {
 //             pattern |> Pattern.fromString |> List.reverse
 //     in
 //     formatWithTokens language tokens
+
+fn format_with_language(
+  language: Language,
+  pattern: String,
+  date: Date,
+) -> String {
+  let tokens =
+    pattern
+    |> pattern.from_string
+    |> list.reverse
+  format_with_tokens(language, tokens, date)
+}
+
 // 
 // 
 // 
@@ -1458,6 +1490,18 @@ fn month_to_name(month: Month) -> String {
 // 
 //         Sun ->
 //             "Sunday"
+fn weekday_to_name(weekday: Weekday) -> String {
+  case weekday {
+    Mon -> "Monday"
+    Tue -> "Tuesday"
+    Wed -> "Wednesday"
+    Thu -> "Thursday"
+    Fri -> "Friday"
+    Sat -> "Saturday"
+    Sun -> "Sunday"
+  }
+}
+
 // 
 // 
 // ordinalSuffix : Int -> String
@@ -1533,6 +1577,24 @@ pub fn with_ordinal_suffix(value: Int) -> String {
 //     , weekdayNameShort = weekdayToName >> String.left 3
 //     , dayWithSuffix = withOrdinalSuffix
 //     }
+fn language_en() -> Language {
+  Language(
+    month_name: month_to_name,
+    month_name_short: fn(val) {
+      val
+      |> month_to_name
+      |> string_take_left(3)
+    },
+    weekday_name: weekday_to_name,
+    weekday_name_short: fn(val) {
+      val
+      |> weekday_to_name
+      |> string_take_left(3)
+    },
+    day_with_suffix: with_ordinal_suffix,
+  )
+}
+
 // 
 // 
 // {-| Format a date using a string as a template.
@@ -1585,6 +1647,10 @@ pub fn with_ordinal_suffix(value: Int) -> String {
 // format : String -> Date -> String
 // format pattern =
 //     formatWithLanguage language_en pattern
+pub fn format(pattern: String, date: Date) -> String {
+  format_with_language(language_en(), pattern, date)
+}
+
 // 
 // 
 // {-| Convert a date to a string in ISO 8601 extended format.
@@ -1598,6 +1664,10 @@ pub fn with_ordinal_suffix(value: Int) -> String {
 // toIsoString : Date -> String
 // toIsoString =
 //     format "yyyy-MM-dd"
+pub fn to_iso_format(date: Date) -> String {
+  format("yyyy-MM-dd", date)
+}
+
 // 
 // 
 // 
@@ -1650,6 +1720,10 @@ pub fn with_ordinal_suffix(value: Int) -> String {
 //                )
 //         )
 //         >> Result.mapError (List.head >> Maybe.map deadEndToString >> Maybe.withDefault "")
+pub fn from_iso_string(str: String) -> Result(Date, String) {
+  todo
+}
+
 // 
 // 
 // deadEndToString : Parser.DeadEnd -> String
@@ -1680,6 +1754,12 @@ pub fn with_ordinal_suffix(value: Int) -> String {
 //     = MonthAndDay Int Int
 //     | WeekAndWeekday Int Int
 //     | OrdinalDay Int
+type DayOfYear {
+  MonthAndDay(Int, Int)
+  WeekAndWeekday(Int, Int)
+  OrdinalDay(Int)
+}
+
 // 
 // 
 // fromYearAndDayOfYear : ( Int, DayOfYear ) -> Result String Date
@@ -1693,6 +1773,23 @@ pub fn with_ordinal_suffix(value: Int) -> String {
 // 
 //         OrdinalDay od ->
 //             fromOrdinalParts y od
+fn from_year_and_day_of_year(
+  year: Int,
+  day_of_year: DayOfYear,
+) -> Result(Date, String) {
+  case day_of_year {
+    MonthAndDay(month_number, day) -> {
+      from_calendar_parts(year, month_number, day)
+    }
+    WeekAndWeekday(week_number, weekday_number) -> {
+      from_week_parts(year, week_number, weekday_number)
+    }
+    OrdinalDay(ordinal_day) -> {
+      from_ordinal_parts(year, ordinal_day)
+    }
+  }
+}
+
 // 
 // 
 // 
@@ -1706,6 +1803,7 @@ pub fn with_ordinal_suffix(value: Int) -> String {
 //         |= dayOfYear
 //         |> Parser.andThen
 //             (fromYearAndDayOfYear >> resultToParser)
+// fn parser() -> Parser
 // 
 // 
 // dayOfYear : Parser DayOfYear
@@ -2552,10 +2650,13 @@ fn pad_signed_int(value: Int, length: Int) -> String {
     False -> ""
   }
 
-  value
-  |> int.absolute_value
-  |> int.to_string
-  |> string.pad_left(length, "0")
+  let suffix =
+    value
+    |> int.absolute_value
+    |> int.to_string
+    |> string.pad_left(length, "0")
+
+  prefix <> suffix
 }
 
 // 
