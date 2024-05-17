@@ -1,6 +1,7 @@
 import gleam/bool
 import gleam/float
 import gleam/int
+import gleam/io
 import gleam/list
 import gleam/order.{type Order}
 import gleam/result
@@ -8,7 +9,7 @@ import gleam/string
 import nibble
 import nibble/lexer as nibble_lexer
 
-import days/parse.{Dash, Digits} as days_parse
+import days/parse.{Dash, Digits, WeekToken} as days_parse
 import days/pattern.{type Token, Field, Literal}
 
 // module Date exposing
@@ -344,7 +345,7 @@ pub fn year(date: Date) -> Int {
 // firstOfYear y =
 //     RD <| daysBeforeYear y + 1
 fn first_of_year(year: Int) -> Date {
-  RD(days_before_year(year + 1))
+  RD(days_before_year(year) + 1)
 }
 
 // 
@@ -452,7 +453,7 @@ pub fn from_week_date(
 
   RD(
     days_before_week_year(week_year)
-    + { int.clamp(week_number, 1, weeks_in_year) - 1 }
+    + { int.clamp(week_number, min: 1, max: weeks_in_year) - 1 }
     * 7
     + weekday_to_number(weekday),
   )
@@ -1813,11 +1814,22 @@ fn from_year_and_day_of_year(
 fn parser() {
   use year <- nibble.do(int_4())
   use _ <- nibble.do(nibble.token(Dash))
-  use month <- nibble.do(int_2())
-  use _ <- nibble.do(nibble.token(Dash))
-  use day <- nibble.do(int_2())
+  use day_of_year <- nibble.do(parse_day_of_year())
 
-  nibble.return(from_calendar_date(year, number_to_month(month), day))
+  case day_of_year {
+    MonthAndDay(month, day) -> {
+      nibble.return(from_calendar_date(year, number_to_month(month), day))
+    }
+    WeekAndWeekday(week, weekday) -> {
+      io.println(string.inspect(year))
+      io.println(string.inspect(week))
+      io.println(string.inspect(weekday))
+      nibble.return(from_week_date(year, week, number_to_weekday(weekday)))
+    }
+    OrdinalDay(ordinal_day) -> {
+      todo
+    }
+  }
 }
 
 // 
@@ -1875,6 +1887,27 @@ fn parser() {
 //         , Parser.succeed
 //             (OrdinalDay 1)
 //         ]
+fn parse_day_of_year() {
+  nibble.one_of([parse_month_and_day(), parse_week_and_weekday()])
+}
+
+fn parse_month_and_day() {
+  use month <- nibble.do(int_2())
+  use _ <- nibble.do(nibble.token(Dash))
+  use day <- nibble.do(int_2())
+
+  nibble.return(MonthAndDay(month, day))
+}
+
+fn parse_week_and_weekday() {
+  use _ <- nibble.do(nibble.token(WeekToken))
+  use week <- nibble.do(int_2())
+  use _ <- nibble.do(nibble.token(Dash))
+  use day <- nibble.do(int_1())
+
+  nibble.return(WeekAndWeekday(week, day))
+}
+
 // 
 // 
 // int4 : Parser Int
@@ -1954,6 +1987,25 @@ fn int_2() {
 //     Parser.chompIf Char.isDigit
 //         |> Parser.mapChompedString
 //             (\str _ -> String.toInt str |> Maybe.withDefault 0)
+fn int_1() {
+  use token <- nibble.do(
+    nibble.take_if("Expecting 1 digits", fn(token) {
+      case token {
+        Digits(str) -> {
+          string.length(str) == 1
+        }
+        _ -> False
+      }
+    }),
+  )
+
+  let assert Digits(str) = token
+
+  let assert Ok(int) = int.parse(str)
+
+  nibble.return(int)
+}
+
 // 
 // 
 // 
