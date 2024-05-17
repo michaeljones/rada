@@ -1,6 +1,8 @@
 import gleam/bool
+import gleam/float
 import gleam/int
 import gleam/list
+import gleam/order.{type Order}
 import gleam/result
 import gleam/string
 
@@ -1912,6 +1914,13 @@ fn from_year_and_day_of_year(
 //     | Months
 //     | Weeks
 //     | Days
+pub type Unit {
+  Years
+  Months
+  Weeks
+  Days
+}
+
 // 
 // 
 // {-| Get a past or future date by adding a number of units to a date.
@@ -1956,6 +1965,38 @@ fn from_year_and_day_of_year(
 // 
 //         Days ->
 //             RD <| rd + n
+pub fn add(unit: Unit, count: Int, date: Date) -> Date {
+  let RD(rd) = date
+  case unit {
+    Years -> {
+      add(Months, { 12 * count }, date)
+    }
+    Months -> {
+      let calendar_date = to_calendar_date(date)
+      let whole_months =
+        12
+        * { calendar_date.year - 1 }
+        + { month_to_number(calendar_date.month) - 1 }
+        + count
+
+      let year = floor_div(whole_months, 12) + 1
+      let month = number_to_month({ whole_months % 12 } + 1)
+
+      RD(
+        days_before_year(year)
+        + days_before_month(year, month)
+        + int.min(calendar_date.day, days_in_month(year, month)),
+      )
+    }
+    Weeks -> {
+      RD(rd + 7 * count)
+    }
+    Days -> {
+      RD(rd + count)
+    }
+  }
+}
+
 // 
 // 
 // {-| The number of whole months between date and 0001-01-01 plus fraction
@@ -1971,6 +2012,19 @@ fn from_year_and_day_of_year(
 //             12 * (date.year - 1) + (monthToNumber date.month - 1)
 //     in
 //     toFloat wholeMonths + toFloat date.day / 100
+fn to_months(rd: RataDie) -> Float {
+  let calendar_date = to_calendar_date(RD(rd))
+  let whole_months =
+    12
+    * { calendar_date.year - 1 }
+    + { month_to_number(calendar_date.month) - 1 }
+
+  // Not designed to be 0-1 of a month - just used for diffing
+  let fraction = int.to_float(calendar_date.day) /. 100.0
+
+  int.to_float(whole_months) +. fraction
+}
+
 // 
 // 
 // {-| Get the difference, as a number of whole units, between two dates.
@@ -1998,6 +2052,30 @@ fn from_year_and_day_of_year(
 // 
 //         Days ->
 //             rd2 - rd1
+pub fn diff(unit: Unit, date1: Date, date2: Date) -> Int {
+  let RD(rd1) = date1
+  let RD(rd2) = date2
+  case unit {
+    Years -> {
+      { to_months(rd2) -. to_months(rd1) }
+      |> float.truncate
+      |> int.divide(12)
+      // Only errors on 0 divisor
+      |> result.unwrap(0)
+    }
+    Months -> {
+      { to_months(rd2) -. to_months(rd1) }
+      |> float.truncate
+    }
+    Weeks -> {
+      int.divide({ rd2 - rd1 }, 7)
+      // Only errors on 0 divisor
+      |> result.unwrap(0)
+    }
+    Days -> rd2 - rd1
+  }
+}
+
 // 
 // 
 // 
@@ -2018,11 +2096,30 @@ fn from_year_and_day_of_year(
 //     | Saturday
 //     | Sunday
 //     | Day
+pub type Interval {
+  Year
+  Quarter
+  Month
+  Week
+  Monday
+  Tuesday
+  Wednesday
+  Thursday
+  Friday
+  Saturday
+  Sunday
+  Day
+}
+
 // 
 // 
 // daysSincePreviousWeekday : Weekday -> Date -> Int
 // daysSincePreviousWeekday wd date =
 //     (weekdayNumber date + 7 - weekdayToNumber wd) |> modBy 7
+fn days_since_previous_weekday(weekday: Weekday, date: Date) -> Int {
+  { weekday_number(date) + 7 - weekday_to_number(weekday) } % 7
+}
+
 // 
 // 
 // {-| Round down a date to the beginning of the closest interval. The resulting
@@ -2073,6 +2170,51 @@ fn from_year_and_day_of_year(
 // 
 //         Day ->
 //             date
+pub fn floor(interval: Interval, date: Date) -> Date {
+  let RD(rd) = date
+  case interval {
+    Year -> {
+      first_of_year(year(date))
+    }
+    Quarter -> {
+      first_of_month(year(date), {
+        quarter(date)
+        |> quarter_to_month
+      })
+    }
+    Month -> {
+      first_of_month(year(date), month(date))
+    }
+    Week -> {
+      RD(rd - days_since_previous_weekday(Mon, date))
+    }
+    Monday -> {
+      RD(rd - days_since_previous_weekday(Mon, date))
+    }
+    Tuesday -> {
+      RD(rd - days_since_previous_weekday(Tue, date))
+    }
+    Wednesday -> {
+      RD(rd - days_since_previous_weekday(Wed, date))
+    }
+    Thursday -> {
+      RD(rd - days_since_previous_weekday(Thu, date))
+    }
+    Friday -> {
+      RD(rd - days_since_previous_weekday(Fri, date))
+    }
+    Saturday -> {
+      RD(rd - days_since_previous_weekday(Sat, date))
+    }
+    Sunday -> {
+      RD(rd - days_since_previous_weekday(Sun, date))
+    }
+    Day -> {
+      date
+    }
+  }
+}
+
 // 
 // 
 // intervalToUnits : Interval -> ( Int, Unit )
@@ -2092,6 +2234,16 @@ fn from_year_and_day_of_year(
 // 
 //         _ ->
 //             ( 1, Weeks )
+fn interval_to_units(interval: Interval) -> #(Int, Unit) {
+  case interval {
+    Year -> #(1, Years)
+    Quarter -> #(3, Months)
+    Month -> #(1, Months)
+    Day -> #(1, Days)
+    _ -> #(1, Weeks)
+  }
+}
+
 // 
 // 
 // {-| Round up a date to the beginning of the closest interval. The resulting
@@ -2123,6 +2275,17 @@ fn from_year_and_day_of_year(
 // 
 // 
 // -- LISTS
+pub fn ceiling(interval: Interval, date: Date) -> Date {
+  let floored_date = floor(interval, date)
+  case date == floored_date {
+    True -> date
+    False -> {
+      let #(n, unit) = interval_to_units(interval)
+      add(unit, n, floored_date)
+    }
+  }
+}
+
 // 
 // 
 // {-| Create a list of dates, at rounded intervals, increasing by a step value,
@@ -2156,6 +2319,24 @@ fn from_year_and_day_of_year(
 // 
 //     else
 //         []
+pub fn range(
+  interval: Interval,
+  step: Int,
+  start_date: Date,
+  until_date: Date,
+) -> List(Date) {
+  let #(n, unit) = interval_to_units(interval)
+  let RD(first_rd) = ceiling(interval, start_date)
+  let RD(until_rd) = until_date
+
+  case first_rd < until_rd {
+    True -> {
+      range_help(unit, int.max(1, step * n), until_rd, [], first_rd)
+    }
+    False -> []
+  }
+}
+
 // 
 // 
 // rangeHelp : Unit -> Int -> RataDie -> List Date -> RataDie -> List Date
@@ -2169,6 +2350,30 @@ fn from_year_and_day_of_year(
 // 
 //     else
 //         List.reverse revList
+fn range_help(
+  unit: Unit,
+  step: Int,
+  until_rd: RataDie,
+  reversed_list: List(Date),
+  current_rd: RataDie,
+) -> List(Date) {
+  case current_rd < until_rd {
+    True -> {
+      let RD(next_rd) = add(unit, step, RD(current_rd))
+      range_help(
+        unit,
+        step,
+        until_rd,
+        [RD(current_rd), ..reversed_list],
+        next_rd,
+      )
+    }
+    False -> {
+      list.reverse(reversed_list)
+    }
+  }
+}
+
 // 
 // 
 // 
@@ -2222,6 +2427,13 @@ fn from_year_and_day_of_year(
 // compare : Date -> Date -> Order
 // compare (RD a) (RD b) =
 //     Basics.compare a b
+pub fn compare(date1: Date, date2: Date) -> Order {
+  let RD(rd_1) = date1
+  let RD(rd_2) = date2
+
+  int.compare(rd_1, rd_2)
+}
+
 // 
 // 
 // {-| Test if a date is within a range, inclusive of the range values.
@@ -2238,6 +2450,14 @@ fn from_year_and_day_of_year(
 // isBetween : Date -> Date -> Date -> Bool
 // isBetween (RD a) (RD b) (RD x) =
 //     isBetweenInt a b x
+pub fn is_between(value: Date, lower: Date, upper: Date) -> Bool {
+  let RD(value_rd) = value
+  let RD(lower_rd) = lower
+  let RD(upper_rd) = upper
+
+  is_between_int(value_rd, lower_rd, upper_rd)
+}
+
 // 
 // 
 // {-| Find the lesser of two dates.
@@ -2255,6 +2475,16 @@ fn from_year_and_day_of_year(
 // 
 //     else
 //         dateB
+pub fn min(date1: Date, date2: Date) -> Date {
+  let RD(rd_1) = date1
+  let RD(rd_2) = date2
+
+  case rd_1 < rd_2 {
+    True -> date1
+    False -> date2
+  }
+}
+
 // 
 // 
 // {-| Find the greater of two dates.
@@ -2272,6 +2502,16 @@ fn from_year_and_day_of_year(
 // 
 //     else
 //         dateA
+pub fn max(date1: Date, date2: Date) -> Date {
+  let RD(rd_1) = date1
+  let RD(rd_2) = date2
+
+  case rd_1 < rd_2 {
+    True -> date2
+    False -> date1
+  }
+}
+
 // 
 // 
 // {-| Clamp a date within a range.
@@ -2295,6 +2535,22 @@ fn from_year_and_day_of_year(
 // 
 //     else
 //         dateX
+pub fn clamp(value: Date, lower: Date, upper: Date) -> Date {
+  let RD(value_rd) = value
+  let RD(lower_rd) = lower
+  let RD(upper_rd) = upper
+
+  case value_rd < lower_rd {
+    True -> lower
+    False -> {
+      case value_rd > upper_rd {
+        True -> upper
+        False -> value
+      }
+    }
+  }
+}
+
 // 
 // 
 // 
