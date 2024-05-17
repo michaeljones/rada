@@ -5,7 +5,10 @@ import gleam/list
 import gleam/order.{type Order}
 import gleam/result
 import gleam/string
+import nibble
+import nibble/lexer as nibble_lexer
 
+import days/parse.{Dash, Digits} as days_parse
 import days/pattern.{type Token, Field, Literal}
 
 // module Date exposing
@@ -1689,7 +1692,7 @@ pub fn to_iso_format(date: Date) -> String {
 // 
 // 
 //     -- week date
-//     fromIsoString "2018-W39-3"
+// fromIsoString "2018-W39-3"
 //         == Ok (fromWeekDate 2018 39 Wed)
 // 
 // 
@@ -1723,7 +1726,9 @@ pub fn to_iso_format(date: Date) -> String {
 //         )
 //         >> Result.mapError (List.head >> Maybe.map deadEndToString >> Maybe.withDefault "")
 pub fn from_iso_string(str: String) -> Result(Date, String) {
-  todo
+  let assert Ok(tokens) = nibble_lexer.run(str, days_parse.lexer())
+  nibble.run(tokens, parser())
+  |> result.map_error(fn(err) { string.inspect(err) })
 }
 
 // 
@@ -1805,7 +1810,16 @@ fn from_year_and_day_of_year(
 //         |= dayOfYear
 //         |> Parser.andThen
 //             (fromYearAndDayOfYear >> resultToParser)
-// fn parser() -> Parser
+fn parser() {
+  use year <- nibble.do(int_4())
+  use _ <- nibble.do(nibble.token(Dash))
+  use month <- nibble.do(int_2())
+  use _ <- nibble.do(nibble.token(Dash))
+  use day <- nibble.do(int_2())
+
+  nibble.return(from_calendar_date(year, number_to_month(month), day))
+}
+
 // 
 // 
 // dayOfYear : Parser DayOfYear
@@ -1876,6 +1890,25 @@ fn from_year_and_day_of_year(
 //         |. Parser.chompIf Char.isDigit
 //         |> Parser.mapChompedString
 //             (\str _ -> String.toInt str |> Maybe.withDefault 0)
+fn int_4() {
+  use token <- nibble.do(
+    nibble.take_if("Expecting 4 digits", fn(token) {
+      case token {
+        Digits(str) -> {
+          string.length(str) == 4
+        }
+        _ -> False
+      }
+    }),
+  )
+
+  let assert Digits(str) = token
+
+  let assert Ok(int) = int.parse(str)
+
+  nibble.return(int)
+}
+
 // 
 // 
 // int3 : Parser Int
@@ -1895,6 +1928,25 @@ fn from_year_and_day_of_year(
 //         |. Parser.chompIf Char.isDigit
 //         |> Parser.mapChompedString
 //             (\str _ -> String.toInt str |> Maybe.withDefault 0)
+fn int_2() {
+  use token <- nibble.do(
+    nibble.take_if("Expecting 2 digits", fn(token) {
+      case token {
+        Digits(str) -> {
+          string.length(str) == 2
+        }
+        _ -> False
+      }
+    }),
+  )
+
+  let assert Digits(str) = token
+
+  let assert Ok(int) = int.parse(str)
+
+  nibble.return(int)
+}
+
 // 
 // 
 // int1 : Parser Int
