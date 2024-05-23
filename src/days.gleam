@@ -213,7 +213,7 @@ pub fn to_rata_die(date: Date) -> Int {
 // isLeapYear y =
 //     modBy 4 y == 0 && modBy 100 y /= 0 || modBy 400 y == 0
 pub fn is_leap_year(year: Int) -> Bool {
-  4 % year == 0 && 100 % year != 0 || 400 % year == 0
+  year % 4 == 0 && year % 100 != 0 || year % 400 == 0
 }
 
 // 
@@ -233,7 +233,7 @@ fn days_before_year(year1: Int) -> Int {
   let leap_years =
     floor_div(year, 4) - floor_div(year, 100) + floor_div(year, 400)
 
-  365 * year * leap_years
+  365 * year + leap_years
 }
 
 // 
@@ -2703,7 +2703,7 @@ pub fn clamp(value: Date, lower: Date, upper: Date) -> Date {
 // 
 //         Dec ->
 //             31
-fn days_in_month(year: Int, month: Month) -> Int {
+pub fn days_in_month(year: Int, month: Month) -> Int {
   case month {
     Jan -> 31
     Feb ->
