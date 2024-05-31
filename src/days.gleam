@@ -213,7 +213,9 @@ pub fn to_rata_die(date: Date) -> Int {
 // isLeapYear y =
 //     modBy 4 y == 0 && modBy 100 y /= 0 || modBy 400 y == 0
 pub fn is_leap_year(year: Int) -> Bool {
-  year % 4 == 0 && year % 100 != 0 || year % 400 == 0
+  modulo_unwrap(year, 4) == 0
+  && modulo_unwrap(year, 100) != 0
+  || modulo_unwrap(year, 400) == 0
 }
 
 // 
@@ -250,7 +252,7 @@ fn days_before_year(year1: Int) -> Int {
 //             n
 pub fn weekday_number(date: Date) -> Int {
   let RD(rd) = date
-  case rd % 7 {
+  case modulo_unwrap(rd, 7) {
     0 -> 7
     n -> n
   }
@@ -266,7 +268,7 @@ pub fn weekday_number(date: Date) -> Int {
 //     in
 //     jan4 - weekdayNumber (RD jan4)
 fn days_before_week_year(year: Int) -> Int {
-  let jan4 = days_before_year(year + 4)
+  let jan4 = days_before_year(year) + 4
   jan4 - weekday_number(RD(jan4))
 }
 
@@ -321,6 +323,10 @@ pub fn year(date: Date) -> Int {
   let #(n400, r400) =
     // -- 400 * 365 + 97
     div_with_remainder(rd, 146_097)
+
+  io.println(string.inspect(rd))
+  io.println(string.inspect(n400))
+  io.println(string.inspect(r400))
 
   let #(n100, r100) =
     // -- 100 * 365 + 24
@@ -453,8 +459,7 @@ pub fn from_week_date(
 
   RD(
     days_before_week_year(week_year)
-    + { int.clamp(week_number, min: 1, max: weeks_in_year) - 1 }
-    * 7
+    + { { int.clamp(week_number, min: 1, max: weeks_in_year) - 1 } * 7 }
     + weekday_to_number(weekday),
   )
 }
@@ -688,8 +693,7 @@ pub fn from_week_parts(
     True, True -> {
       Ok(RD(
         days_before_week_year(week_year)
-        + { week_number - 1 }
-        * 7
+        + { { week_number - 1 } * 7 }
         + weekday_number,
       ))
     }
@@ -813,11 +817,11 @@ pub fn to_week_date(date: Date) {
   let RD(rd) = date
   let weekday_number_ = weekday_number(date)
   let week_year = year(RD(rd + { 4 - weekday_number_ }))
-  let week_1_day_1 = days_before_week_year(week_year + 1)
+  let week_1_day_1 = days_before_week_year(week_year) + 1
 
   WeekDate(
     week_year: week_year,
-    week_number: 1 + { rd - week_1_day_1 },
+    week_number: 1 + { { rd - week_1_day_1 } / 7 },
     weekday: number_to_weekday(weekday_number_),
   )
 }
@@ -1540,10 +1544,10 @@ fn weekday_to_name(weekday: Weekday) -> String {
 //             "th"
 fn ordinal_suffix(value: Int) -> String {
   // use 2-digit number
-  let value_mod_100 = value % 100
+  let value_mod_100 = modulo_unwrap(value, 100)
   let value = case value_mod_100 < 20 {
     True -> value_mod_100
-    False -> value_mod_100 % 10
+    False -> modulo_unwrap(value_mod_100, 10)
   }
   case int.min(value, 4) {
     1 -> "st"
@@ -2078,13 +2082,12 @@ pub fn add(unit: Unit, count: Int, date: Date) -> Date {
     Months -> {
       let calendar_date = to_calendar_date(date)
       let whole_months =
-        12
-        * { calendar_date.year - 1 }
+        { 12 * { calendar_date.year - 1 } }
         + { month_to_number(calendar_date.month) - 1 }
         + count
 
       let year = floor_div(whole_months, 12) + 1
-      let month = number_to_month({ whole_months % 12 } + 1)
+      let month = number_to_month(modulo_unwrap(whole_months, 12) + 1)
 
       RD(
         days_before_year(year)
@@ -2119,8 +2122,7 @@ pub fn add(unit: Unit, count: Int, date: Date) -> Date {
 fn to_months(rd: RataDie) -> Float {
   let calendar_date = to_calendar_date(RD(rd))
   let whole_months =
-    12
-    * { calendar_date.year - 1 }
+    { 12 * { calendar_date.year - 1 } }
     + { month_to_number(calendar_date.month) - 1 }
 
   // Not designed to be 0-1 of a month - just used for diffing
@@ -2221,7 +2223,7 @@ pub type Interval {
 // daysSincePreviousWeekday wd date =
 //     (weekdayNumber date + 7 - weekdayToNumber wd) |> modBy 7
 fn days_since_previous_weekday(weekday: Weekday, date: Date) -> Int {
-  { weekday_number(date) + 7 - weekday_to_number(weekday) } % 7
+  modulo_unwrap(weekday_number(date) + 7 - weekday_to_number(weekday), 7)
 }
 
 // 
@@ -3038,7 +3040,11 @@ fn floor_div(a: Int, b: Int) -> Int {
 // divWithRemainder a b =
 //     ( floorDiv a b, a |> modBy b )
 fn div_with_remainder(a: Int, b: Int) -> #(Int, Int) {
-  #(floor_div(a, b), a % b)
+  #(floor_div(a, b), modulo_unwrap(a, b))
+}
+
+fn modulo_unwrap(a: Int, b: Int) -> Int {
+  int.modulo(a, b) |> result.unwrap(0)
 }
 
 // 
