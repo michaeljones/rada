@@ -1,4 +1,5 @@
 import gleam/io
+import gleam/list
 import gleam/result
 import gleam/set
 import gleam/string
@@ -35,6 +36,22 @@ pub type LexerToken {
   Quote
   EscapedQuote
   Text(String)
+}
+
+fn is_alpha(token: LexerToken) {
+  case token {
+    Alpha(_) -> True
+    _ -> False
+  }
+}
+
+fn is_specific_alpha(char: String) {
+  fn(token: LexerToken) {
+    case token {
+      Alpha(c) -> c == char
+      _ -> False
+    }
+  }
 }
 
 // 
@@ -109,19 +126,24 @@ pub fn from_string(str: String) -> Pattern {
 
   case tokens_result {
     Ok(tokens) -> {
-      nibble.run(tokens, parser())
+      nibble.run(tokens, parser([]))
       |> result.unwrap([Literal(str)])
     }
-    Error(_error) -> {
+    Error(error) -> {
+      io.println("Error: " <> string.inspect(error))
       []
     }
   }
 }
 
-fn parser() {
-  nibble.one_of([field()])
+fn parser(tokens: List(Token)) {
+  nibble.one_of([
+    nibble.one_of([field()])
+      |> nibble.then(fn(token) { parser([token, ..tokens]) }),
+    nibble.succeed(finalize(tokens)),
+  ])
   //, literal, escaped_quote, quoted])
-  nibble.return([])
+  // nibble.return([])
 }
 
 // 
@@ -137,12 +159,12 @@ fn parser() {
 //         |> Parser.andThen fieldRepeats
 
 fn field() {
-  nibble.take_if("Expecting an Alpha token", fn(token) {
-    case token {
-      Alpha(_) -> True
-      _ -> False
-    }
-  })
+  use alpha <- nibble.do(nibble.take_if("Expecting an Alpha token", is_alpha))
+  let assert Alpha(char) = alpha
+
+  use rest <- nibble.do(nibble.take_while(is_specific_alpha(char)))
+
+  nibble.return(Field(char, list.length(rest) + 1))
 }
 
 // 
@@ -176,6 +198,7 @@ fn field() {
 fn literal() {
   nibble.succeed(Nil)
 }
+
 // 
 // 
 // isLiteralChar : Char -> Bool
@@ -237,4 +260,17 @@ fn literal() {
 //                     token :: tokens
 //         )
 //         []
+
+fn finalize(tokens: List(Token)) -> List(Token) {
+  list.fold(tokens, [], fn(tokens, token) {
+    case token, tokens {
+      Literal(x), [Literal(y), ..rest] -> {
+        [Literal(x <> y), ..rest]
+      }
+      _, _ -> {
+        [token, ..tokens]
+      }
+    }
+  })
+}
 //         

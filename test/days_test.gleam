@@ -259,6 +259,65 @@ pub fn week_date_sample_test() {
 //                 , ( "eeeeee", "Tu" )
 //                 , ( "eeeeeee", "" )
 //                 ]
+pub fn format_supported_character_pattern_test() {
+  list.each(
+    [
+      #("y", "2001"),
+      #("yy", "01"),
+      #("yyy", "2001"),
+      #("yyyy", "2001"),
+      #("yyyyy", "02001"),
+      #("Y", "2001"),
+      #("YY", "01"),
+      #("YYY", "2001"),
+      #("YYYY", "2001"),
+      #("YYYYY", "02001"),
+      #("Q", "1"),
+      #("QQ", "1"),
+      #("QQQ", "Q1"),
+      #("QQQQ", "1st"),
+      #("QQQQQ", "1"),
+      #("QQQQQQ", ""),
+      #("M", "1"),
+      #("MM", "01"),
+      #("MMM", "Jan"),
+      #("MMMM", "January"),
+      #("MMMMM", "J"),
+      #("MMMMMM", ""),
+      #("w", "1"),
+      #("ww", "01"),
+      #("www", ""),
+      #("d", "2"),
+      #("dd", "02"),
+      #("ddd", "2nd"),
+      #("dddd", ""),
+      #("D", "2"),
+      #("DD", "02"),
+      #("DDD", "002"),
+      #("DDDD", ""),
+      #("E", "Tue"),
+      #("EE", "Tue"),
+      #("EEE", "Tue"),
+      #("EEEE", "Tuesday"),
+      #("EEEEE", "T"),
+      #("EEEEEE", "Tu"),
+      #("EEEEEEE", ""),
+      #("e", "2"),
+      #("ee", "2"),
+      #("eee", "Tue"),
+      #("eeee", "Tuesday"),
+      #("eeeee", "T"),
+      #("eeeeee", "Tu"),
+      #("eeeeeee", ""),
+    ],
+    fn(tuple) {
+      let #(pattern, text) = tuple
+      let date = days.from_calendar_date(2001, days.Jan, 2)
+      should.equal(days.format(pattern, date), text)
+    },
+  )
+}
+
 //         , describe "removes unsupported pattern characters" <|
 //             List.map
 //                 (toTest (Date.fromCalendarDate 2008 Dec 31))

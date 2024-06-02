@@ -324,10 +324,6 @@ pub fn year(date: Date) -> Int {
     // -- 400 * 365 + 97
     div_with_remainder(rd, 146_097)
 
-  io.println(string.inspect(rd))
-  io.println(string.inspect(n400))
-  io.println(string.inspect(r400))
-
   let #(n100, r100) =
     // -- 100 * 365 + 24
     div_with_remainder(r400, 36_524)
@@ -1404,13 +1400,16 @@ fn format_with_tokens(
 
 fn format_with_language(
   language: Language,
-  pattern: String,
+  pattern_text: String,
   date: Date,
 ) -> String {
   let tokens =
-    pattern
+    pattern_text
     |> pattern.from_string
     |> list.reverse
+
+  io.println(string.inspect(pattern_text))
+  io.println(string.inspect(tokens))
   format_with_tokens(language, tokens, date)
 }
 
