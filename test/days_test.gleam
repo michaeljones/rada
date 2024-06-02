@@ -5,7 +5,7 @@ import gleam/string
 import gleeunit
 import gleeunit/should
 
-import days.{type CalendarDate, CalendarDate}
+import days.{type CalendarDate, type Date, type WeekDate, CalendarDate, WeekDate}
 
 pub fn main() {
   gleeunit.main()
@@ -82,37 +82,19 @@ pub fn leap_year_test() {
 //                     )
 //             )
 //         ]
-// pub fn calendar_date_test() {
-//   list.concat([
-//     list.range(1897, 1905),
-//     list.range(1997, 2025),
-//     list.range(-5, 5),
-//     list.range(-105, -95),
-//     list.range(-405, -395),
-//   ])
-//   |> list.map(calendar_dates_in_year)
-//   |> list.concat
-//   |> list.each(fn(date) {
-//     expect_isomorphism(from_calendar_date, to_calendar_date, date)
-//   })
-// }
-
-pub fn year_test() {
-  days.from_calendar_date(1, days.Jan, 1)
-  |> days.year
-  |> should.equal(1)
-
-  days.from_calendar_date(2, days.Jan, 1)
-  |> days.year
-  |> should.equal(2)
-
-  days.from_calendar_date(2020, days.May, 23)
-  |> days.year
-  |> should.equal(2020)
-
-  days.from_calendar_date(-5, days.May, 30)
-  |> days.year
-  |> should.equal(-5)
+pub fn calendar_date_test() {
+  list.concat([
+    list.range(1897, 1905),
+    list.range(1997, 2025),
+    list.range(-5, 5),
+    list.range(-105, -95),
+    list.range(-405, -395),
+  ])
+  |> list.map(calendar_dates_in_year)
+  |> list.concat
+  |> list.each(fn(date) {
+    expect_isomorphism(from_calendar_date, to_calendar_date, date)
+  })
 }
 
 // test_RataDie : Test
@@ -128,6 +110,19 @@ pub fn year_test() {
 //                             (Date.fromCalendarDate 2025 Dec 31 |> Date.toRataDie)
 //                         )
 //         ]
+pub fn rata_die_test() {
+  list.range(1997, 2025)
+  |> list.map(fn(year) {
+    year
+    |> calendar_dates_in_year
+    |> list.map(fn(date) { date |> from_calendar_date |> days.to_rata_die })
+  })
+  |> list.concat
+  |> should.equal(list.range(
+    days.from_calendar_date(1997, days.Jan, 1) |> days.to_rata_die,
+    days.from_calendar_date(2025, days.Dec, 31) |> days.to_rata_die,
+  ))
+}
 
 // test_WeekDate : Test
 // test_WeekDate =
@@ -169,6 +164,40 @@ pub fn year_test() {
 //                     )
 //             )
 //         ]
+
+pub fn week_date_isomorphic_test() {
+  list.concat([list.range(1997, 2025), list.range(-5, 5)])
+  |> list.map(calendar_dates_in_year)
+  |> list.concat
+  |> list.each(fn(date) {
+    expect_isomorphism(to_week_date, from_week_date, from_calendar_date(date))
+  })
+}
+
+pub fn week_date_sample_test() {
+  [
+    #(CalendarDate(2005, days.Jan, 1), WeekDate(2004, 53, days.Sat)),
+    #(CalendarDate(2005, days.Jan, 2), WeekDate(2004, 53, days.Sun)),
+    #(CalendarDate(2005, days.Dec, 31), WeekDate(2005, 52, days.Sat)),
+    #(CalendarDate(2007, days.Jan, 1), WeekDate(2007, 1, days.Mon)),
+    #(CalendarDate(2007, days.Dec, 30), WeekDate(2007, 52, days.Sun)),
+    #(CalendarDate(2007, days.Dec, 31), WeekDate(2008, 1, days.Mon)),
+    #(CalendarDate(2008, days.Jan, 1), WeekDate(2008, 1, days.Tue)),
+    #(CalendarDate(2008, days.Dec, 28), WeekDate(2008, 52, days.Sun)),
+    #(CalendarDate(2008, days.Dec, 29), WeekDate(2009, 1, days.Mon)),
+    #(CalendarDate(2008, days.Dec, 30), WeekDate(2009, 1, days.Tue)),
+    #(CalendarDate(2008, days.Dec, 31), WeekDate(2009, 1, days.Wed)),
+    #(CalendarDate(2009, days.Jan, 1), WeekDate(2009, 1, days.Thu)),
+    #(CalendarDate(2009, days.Dec, 31), WeekDate(2009, 53, days.Thu)),
+    #(CalendarDate(2010, days.Jan, 1), WeekDate(2009, 53, days.Fri)),
+    #(CalendarDate(2010, days.Jan, 2), WeekDate(2009, 53, days.Sat)),
+    #(CalendarDate(2010, days.Jan, 3), WeekDate(2009, 53, days.Sun)),
+  ]
+  |> list.map(fn(tuple) {
+    let #(calendar_date, week_date) = tuple
+    should.equal(from_calendar_date(calendar_date) |> to_week_date, week_date)
+  })
+}
 
 // test_format : Test
 // test_format =
@@ -1021,6 +1050,26 @@ pub fn year_test() {
 //                 ]
 //         ]
 
+// Additional tests - not part of the original port
+
+pub fn year_test() {
+  days.from_calendar_date(1, days.Jan, 1)
+  |> days.year
+  |> should.equal(1)
+
+  days.from_calendar_date(2, days.Jan, 1)
+  |> days.year
+  |> should.equal(2)
+
+  days.from_calendar_date(2020, days.May, 23)
+  |> days.year
+  |> should.equal(2020)
+
+  days.from_calendar_date(-5, days.May, 30)
+  |> days.year
+  |> should.equal(-5)
+}
+
 // -- records
 
 // type alias OrdinalDate =
@@ -1058,6 +1107,10 @@ fn to_calendar_date(date: days.Date) -> CalendarDate {
 // fromWeekDate : WeekDate -> Date
 // fromWeekDate { weekYear, weekNumber, weekday } =
 //     Date.fromWeekDate weekYear weekNumber weekday
+fn from_week_date(week_date: WeekDate) -> Date {
+  let WeekDate(week_year, week_number, weekday) = week_date
+  days.from_week_date(week_year, week_number, weekday)
+}
 
 // toWeekDate : Date -> WeekDate
 // toWeekDate date =
@@ -1065,6 +1118,13 @@ fn to_calendar_date(date: days.Date) -> CalendarDate {
 //         (date |> Date.weekYear)
 //         (date |> Date.weekNumber)
 //         (date |> Date.weekday)
+fn to_week_date(date: Date) -> WeekDate {
+  days.WeekDate(
+    week_year: days.week_year(date),
+    week_number: days.week_number(date),
+    weekday: days.weekday(date),
+  )
+}
 
 // -- dates
 

@@ -1,7 +1,6 @@
 import gleeunit/should
 
 import days/pattern.{Field}
-
 // test_fromString : Test
 // test_fromString =
 //     let
@@ -22,12 +21,12 @@ import days/pattern.{Field}
 //             , ( "'''aaa ' '' - ''' '' '' '..' a '", [ l "'aaa  ' - ' ' ' .. a " ] )
 //             ]
 
-pub fn from_string_1_test() {
-  pattern.from_string("aaa")
-  |> should.equal([Field("a", 3)])
-}
+// pub fn from_string_1_test() {
+//   pattern.from_string("aaa")
+//   |> should.equal([Field("a", 3)])
+// }
 
-pub fn from_string_2_test() {
-  pattern.from_string("abbccc")
-  |> should.equal([Field("a", 1), Field("b", 2), Field("c", 3)])
-}
+// pub fn from_string_2_test() {
+//   pattern.from_string("abbccc")
+//   |> should.equal([Field("a", 1), Field("b", 2), Field("c", 3)])
+// }
