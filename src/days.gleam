@@ -1168,7 +1168,7 @@ fn format_field(
           date
           |> quarter
           |> int.to_string
-          |> fn(str) { str <> "Q" }
+          |> fn(str) { "Q" <> str }
 
         4 ->
           date
