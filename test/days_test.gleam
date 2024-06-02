@@ -313,7 +313,7 @@ pub fn format_supported_character_pattern_test() {
     fn(tuple) {
       let #(pattern, text) = tuple
       let date = days.from_calendar_date(2001, days.Jan, 2)
-      should.equal(days.format(pattern, date), text)
+      should.equal(days.format(date, pattern), text)
     },
   )
 }
@@ -323,11 +323,25 @@ pub fn format_supported_character_pattern_test() {
 //                 (toTest (Date.fromCalendarDate 2008 Dec 31))
 //                 [ ( "ABCFGHIJKLNOPRSTUVWXZabcfghijklmnopqrstuvxz", "" )
 //                 ]
+pub fn format_removes_unsupported_pattern_characters_test() {
+  let date = days.from_calendar_date(2008, days.Dec, 31)
+  date
+  |> days.format("ABCFGHIJKLNOPRSTUVWXZabcfghijklmnopqrstuvxz")
+  |> should.equal("")
+}
+
 //         , describe "ignores non-alpha characters" <|
 //             List.map
 //                 (toTest (Date.fromCalendarDate 2008 Dec 31))
 //                 [ ( "0123456789 .,\\//:-%", "0123456789 .,\\//:-%" )
 //                 ]
+pub fn format_ignores_non_alpha_characters_test() {
+  let date = days.from_calendar_date(2008, days.Dec, 31)
+  date
+  |> days.format("0123456789 .,\\//:-%")
+  |> should.equal("0123456789 .,\\//:-%")
+}
+
 //         , describe "handles escaped characters and escaped escape characters" <|
 //             List.map
 //                 (toTest (Date.fromCalendarDate 2001 Jan 2))

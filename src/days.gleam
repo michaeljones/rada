@@ -1656,7 +1656,7 @@ fn language_en() -> Language {
 // format : String -> Date -> String
 // format pattern =
 //     formatWithLanguage language_en pattern
-pub fn format(pattern: String, date: Date) -> String {
+pub fn format(date: Date, pattern: String) -> String {
   format_with_language(language_en(), pattern, date)
 }
 
@@ -1674,7 +1674,7 @@ pub fn format(pattern: String, date: Date) -> String {
 // toIsoString =
 //     format "yyyy-MM-dd"
 pub fn to_iso_format(date: Date) -> String {
-  format("yyyy-MM-dd", date)
+  format(date, "yyyy-MM-dd")
 }
 
 // 

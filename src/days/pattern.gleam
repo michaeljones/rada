@@ -54,6 +54,13 @@ fn is_specific_alpha(char: String) {
   }
 }
 
+fn is_text(token: LexerToken) {
+  case token {
+    Text(_) -> True
+    _ -> False
+  }
+}
+
 // 
 // 
 // fromString : String -> Pattern
@@ -138,7 +145,7 @@ pub fn from_string(str: String) -> Pattern {
 
 fn parser(tokens: List(Token)) {
   nibble.one_of([
-    nibble.one_of([field()])
+    nibble.one_of([field(), literal(), escaped_quote()])
       |> nibble.then(fn(token) { parser([token, ..tokens]) }),
     nibble.succeed(finalize(tokens)),
   ])
@@ -160,6 +167,7 @@ fn parser(tokens: List(Token)) {
 
 fn field() {
   use alpha <- nibble.do(nibble.take_if("Expecting an Alpha token", is_alpha))
+
   let assert Alpha(char) = alpha
 
   use rest <- nibble.do(nibble.take_while(is_specific_alpha(char)))
@@ -186,6 +194,11 @@ fn field() {
 // escapedQuote =
 //     Parser.succeed (Literal "'")
 //         |. Parser.token "''"
+fn escaped_quote() {
+  nibble.token(EscapedQuote)
+  |> nibble.then(fn(_) { nibble.succeed(Literal("'")) })
+}
+
 // 
 // 
 // literal : Parser Token
@@ -196,7 +209,17 @@ fn field() {
 //         |> Parser.getChompedString
 //         |> Parser.map Literal
 fn literal() {
-  nibble.succeed(Nil)
+  use text <- nibble.do(nibble.take_if("Expecting an Text token", is_text))
+  use rest <- nibble.do(nibble.take_while(is_text))
+
+  let joined =
+    list.map([text, ..rest], fn(entry) {
+      let assert Text(text) = entry
+      text
+    })
+    |> string.concat()
+
+  nibble.return(Literal(joined))
 }
 
 // 
