@@ -61,6 +61,34 @@ fn is_text(token: LexerToken) {
   }
 }
 
+fn is_quote(token: LexerToken) {
+  case token {
+    Quote -> True
+    _ -> False
+  }
+}
+
+fn is_escaped_quote(token: LexerToken) {
+  case token {
+    EscapedQuote -> True
+    _ -> False
+  }
+}
+
+fn extract_content(tokens: List(LexerToken)) {
+  case tokens {
+    [] -> ""
+    [token, ..rest] -> {
+      case token {
+        Alpha(str) -> str <> extract_content(rest)
+        Quote -> "'" <> extract_content(rest)
+        EscapedQuote -> "'" <> extract_content(rest)
+        Text(str) -> str <> extract_content(rest)
+      }
+    }
+  }
+}
+
 // 
 // 
 // fromString : String -> Pattern
@@ -87,8 +115,17 @@ pub fn from_string(str: String) -> Pattern {
           }
         }
       }),
-      lexer.token("''", EscapedQuote),
-      lexer.token("'", Quote),
+      lexer.custom(fn(mode, lexeme, next_grapheme) {
+        case lexeme {
+          "'" ->
+            case next_grapheme {
+              "'" -> lexer.Skip
+              _ -> lexer.Keep(Quote, mode)
+            }
+          "''" -> lexer.Keep(EscapedQuote, mode)
+          _ -> lexer.NoMatch
+        }
+      }),
       lexer.keep(fn(lexeme, _grapheme) {
         case lexeme {
           "" -> {
@@ -97,34 +134,6 @@ pub fn from_string(str: String) -> Pattern {
           _ -> Ok(Text(lexeme))
         }
       }),
-      // lexer.custom(fn(mode, lexeme, grapheme) {
-    //   case lexeme {
-    //     "" -> lexer.Skip
-    //     value -> {
-    //       case string.last(value) {
-    //         Ok(last) if last == grapheme -> {
-    //           lexer.Skip
-    //         }
-    //         Ok(last) -> {
-    //           lexer.Keep(Field(last, string.length(lexeme)), mode)
-    //         }
-    //         Error(Nil) -> {
-    //           lexer.Skip
-    //         }
-    //       }
-    //     }
-    //   }
-    // }// case lexeme {
-    //   "" -> Ok(grapheme)
-    //   value -> {
-    //     case string.last(value) == Ok(grapheme) {
-    //       True -> Ok(value <> grapheme)
-    //       False -> Ok(value)
-    //     }
-    //   }
-    // }
-    // Error(Nil)
-    // ),
     ])
 
   let tokens_result = lexer.run(str, l)
@@ -145,12 +154,10 @@ pub fn from_string(str: String) -> Pattern {
 
 fn parser(tokens: List(Token)) {
   nibble.one_of([
-    nibble.one_of([field(), literal(), escaped_quote()])
+    nibble.one_of([field(), literal(), escaped_quote(), quoted()])
       |> nibble.then(fn(token) { parser([token, ..tokens]) }),
     nibble.succeed(finalize(tokens)),
   ])
-  //, literal, escaped_quote, quoted])
-  // nibble.return([])
 }
 
 // 
@@ -238,6 +245,22 @@ fn literal() {
 //             [ Parser.chompIf ((==) '\'')
 //             , Parser.end -- lenient parse for unclosed quotes
 //             ]
+fn quoted() {
+  use _ <- nibble.do(nibble.take_if("Expecting an Quote", is_quote))
+
+  use text <- nibble.do(quoted_help(""))
+
+  use _ <- nibble.do(
+    nibble.one_of([
+      nibble.take_if("Expecting an Quote", is_quote)
+        |> nibble.map(fn(_) { Nil }),
+      nibble.eof(),
+    ]),
+  )
+
+  nibble.return(Literal(text))
+}
+
 // 
 // 
 // quotedHelp : String -> Parser String
@@ -252,6 +275,26 @@ fn literal() {
 //             |> Parser.andThen (\_ -> quotedHelp (result ++ "'"))
 //         , Parser.succeed result
 //         ]
+
+fn quoted_help(result: String) -> nibble.Parser(String, LexerToken, c) {
+  nibble.one_of([
+    {
+      use tokens <- nibble.do(
+        nibble.take_while1("Expecting a non-Quote", fn(token) {
+          !is_quote(token)
+        }),
+      )
+
+      let str = extract_content(tokens)
+
+      quoted_help(result <> str)
+    },
+    nibble.token(EscapedQuote)
+      |> nibble.then(fn(_) { quoted_help(result <> "'") }),
+    nibble.succeed(result),
+  ])
+}
+
 // 
 // 
 // patternHelp : List Token -> Parser (List Token)

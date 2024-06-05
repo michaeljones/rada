@@ -349,6 +349,23 @@ pub fn format_ignores_non_alpha_characters_test() {
 //                 , ( "''' '' ''' ''", "' ' ' '" )
 //                 , ( "'yyyy:' yyyy", "yyyy: 2001" )
 //                 ]
+pub fn format_handles_escaped_characters_and_escaped_escape_characters_test() {
+  let date = days.from_calendar_date(2008, days.Dec, 31)
+  list.each(
+    [
+      #("'yYQMwdDEe'", "yYQMwdDEe"),
+      #("''' '' ''' ''", "' ' ' '"),
+      #("'yyyy:' yyyy", "yyyy: 2008"),
+    ],
+    fn(tuple) {
+      let #(pattern, text) = tuple
+      date
+      |> days.format(pattern)
+      |> should.equal(text)
+    },
+  )
+}
+
 //         , describe "is lenient on unclosed quotes" <|
 //             List.map
 //                 (toTest (Date.fromCalendarDate 2001 Jan 2))
