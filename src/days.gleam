@@ -1398,10 +1398,10 @@ fn format_with_tokens(
 //     in
 //     formatWithTokens language tokens
 
-fn format_with_language(
+pub fn format_with_language(
+  date: Date,
   language: Language,
   pattern_text: String,
-  date: Date,
 ) -> String {
   let tokens =
     pattern_text
@@ -1657,7 +1657,7 @@ fn language_en() -> Language {
 // format pattern =
 //     formatWithLanguage language_en pattern
 pub fn format(date: Date, pattern: String) -> String {
-  format_with_language(language_en(), pattern, date)
+  format_with_language(date, language_en(), pattern)
 }
 
 // 

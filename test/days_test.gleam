@@ -6,6 +6,7 @@ import gleeunit
 import gleeunit/should
 
 import days.{type CalendarDate, type Date, type WeekDate, CalendarDate, WeekDate}
+import french_language.{language_fr}
 
 pub fn main() {
   gleeunit.main()
@@ -371,6 +372,14 @@ pub fn format_handles_escaped_characters_and_escaped_escape_characters_test() {
 //                 (toTest (Date.fromCalendarDate 2001 Jan 2))
 //                 [ ( "yyyy 'yyyy", "2001 yyyy" )
 //                 ]
+
+pub fn format_is_lenient_on_unclosed_quotes_test() {
+  let date = days.from_calendar_date(2008, days.Dec, 31)
+  date
+  |> days.format("yyyy 'yyyy")
+  |> should.equal("2008 yyyy")
+}
+
 //         , describe "formats day ordinals" <|
 //             List.map
 //                 (\( n, string ) ->
@@ -408,6 +417,50 @@ pub fn format_handles_escaped_characters_and_escaped_escape_characters_test() {
 //                 , ( 30, "30th" )
 //                 , ( 31, "31st" )
 //                 ]
+pub fn format_formats_day_ordinals_test() {
+  list.each(
+    [
+      #(1, "1st"),
+      #(2, "2nd"),
+      #(3, "3rd"),
+      #(4, "4th"),
+      #(5, "5th"),
+      #(6, "6th"),
+      #(7, "7th"),
+      #(8, "8th"),
+      #(9, "9th"),
+      #(10, "10th"),
+      #(11, "11th"),
+      #(12, "12th"),
+      #(13, "13th"),
+      #(14, "14th"),
+      #(15, "15th"),
+      #(16, "16th"),
+      #(17, "17th"),
+      #(18, "18th"),
+      #(19, "19th"),
+      #(20, "20th"),
+      #(21, "21st"),
+      #(22, "22nd"),
+      #(23, "23rd"),
+      #(24, "24th"),
+      #(25, "25th"),
+      #(26, "26th"),
+      #(27, "27th"),
+      #(28, "28th"),
+      #(29, "29th"),
+      #(30, "30th"),
+      #(31, "31st"),
+    ],
+    fn(tuple) {
+      let #(day, expected) = tuple
+      days.from_calendar_date(2008, days.Dec, day)
+      |> days.format("ddd")
+      |> should.equal(expected)
+    },
+  )
+}
+
 //         , describe "formats with sample patterns as expected" <|
 //             List.map
 //                 (toTest (Date.fromCalendarDate 2008 Dec 31))
@@ -418,6 +471,24 @@ pub fn format_handles_escaped_characters_and_escaped_escape_characters_test() {
 //                 , ( "''yy", "'08" )
 //                 ]
 //         ]
+
+pub fn format_formats_with_sample_patterns_as_expected_test() {
+  list.each(
+    [
+      #("yyyy-MM-dd", "2008-12-31"),
+      #("yyyy-DDD", "2008-366"),
+      #("YYYY-'W'ww-e", "2009-W01-3"),
+      #("M/d/y", "12/31/2008"),
+      #("''yy", "'08"),
+    ],
+    fn(tuple) {
+      let #(pattern, expected) = tuple
+      days.from_calendar_date(2008, days.Dec, 31)
+      |> days.format(pattern)
+      |> should.equal(expected)
+    },
+  )
+}
 
 // test_formatWithLanguage : Test
 // test_formatWithLanguage =
@@ -448,6 +519,33 @@ pub fn format_handles_escaped_characters_and_escaped_escape_characters_test() {
 //                 , ( "EEEEEEE", "" )
 //                 ]
 //         ]
+pub fn format_with_language_test() {
+  list.each(
+    [
+      #("MMM", "janv."),
+      #("MMMM", "janvier"),
+      #("MMMMM", "j"),
+      #("MMMMMM", ""),
+      #("d", "1"),
+      #("dd", "01"),
+      #("ddd", "1er"),
+      #("dddd", ""),
+      #("E", "lun"),
+      #("EE", "lun"),
+      #("EEE", "lun"),
+      #("EEEE", "lundi"),
+      #("EEEEE", "l"),
+      #("EEEEEE", "lu"),
+      #("EEEEEEE", ""),
+    ],
+    fn(tuple) {
+      let #(pattern, expected) = tuple
+      days.from_calendar_date(2001, days.Jan, 1)
+      |> days.format_with_language(language_fr(), pattern)
+      |> should.equal(expected)
+    },
+  )
+}
 
 // test_add : Test
 // test_add =
