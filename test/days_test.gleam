@@ -1170,10 +1170,30 @@ pub fn range_beings_at_interval_nearest_start_date_test() {
 //             \() ->
 //                 Date.range Day 1 (Date.fromCalendarDate 2000 Jan 1) (Date.fromCalendarDate 2001 Jan 1)
 //                     |> equal (calendarDatesInYear 2000 |> List.map fromCalendarDate)
+pub fn range_returns_a_list_of_days_test() {
+  days.range(
+    days.Day,
+    1,
+    days.from_calendar_date(2000, days.Jan, 1),
+    days.from_calendar_date(2001, days.Jan, 1),
+  )
+  |> should.equal(calendar_dates_in_year(2000) |> list.map(from_calendar_date))
+}
+
 //         , test "can return the empty list" <|
 //             \() ->
 //                 Date.range Day 1 (Date.fromCalendarDate 2000 Jan 1) (Date.fromCalendarDate 2000 Jan 1)
 //                     |> equal []
+pub fn range_can_return_empty_list_test() {
+  days.range(
+    days.Day,
+    1,
+    days.from_calendar_date(2000, days.Jan, 1),
+    days.from_calendar_date(2000, days.Jan, 1),
+  )
+  |> should.equal([])
+}
+
 //         , describe "can return a large list (tail recursion)"
 //             [ let
 //                 start =
@@ -1189,6 +1209,16 @@ pub fn range_beings_at_interval_nearest_start_date_test() {
 //                 \() -> Date.range Day 1 start end |> List.length |> equal expectedLength
 //             ]
 //         ]
+pub fn range_can_return_large_list_test() {
+  let start = days.from_calendar_date(1950, days.Jan, 1)
+  let end = days.from_calendar_date(2050, days.Jan, 1)
+
+  let expected_length = days.diff(days.Days, start, end)
+
+  days.range(days.Day, 1, start, end)
+  |> list.length
+  |> should.equal(expected_length)
+}
 
 // test_fromIsoString : Test
 // test_fromIsoString =
