@@ -2072,11 +2072,11 @@ pub type Unit {
 // 
 //         Days ->
 //             RD <| rd + n
-pub fn add(unit: Unit, count: Int, date: Date) -> Date {
+pub fn add(date: Date, count: Int, unit: Unit) -> Date {
   let RD(rd) = date
   case unit {
     Years -> {
-      add(Months, { 12 * count }, date)
+      add(date, { 12 * count }, Months)
     }
     Months -> {
       let calendar_date = to_calendar_date(date)
@@ -2275,7 +2275,7 @@ fn days_since_previous_weekday(weekday: Weekday, date: Date) -> Int {
 // 
 //         Day ->
 //             date
-pub fn floor(interval: Interval, date: Date) -> Date {
+pub fn floor(date: Date, interval: Interval) -> Date {
   let RD(rd) = date
   case interval {
     Year -> {
@@ -2380,13 +2380,13 @@ fn interval_to_units(interval: Interval) -> #(Int, Unit) {
 // 
 // 
 // -- LISTS
-pub fn ceiling(interval: Interval, date: Date) -> Date {
-  let floored_date = floor(interval, date)
+pub fn ceiling(date: Date, interval: Interval) -> Date {
+  let floored_date = floor(date, interval)
   case date == floored_date {
     True -> date
     False -> {
       let #(n, unit) = interval_to_units(interval)
-      add(unit, n, floored_date)
+      add(floored_date, n, unit)
     }
   }
 }
@@ -2431,7 +2431,7 @@ pub fn range(
   until_date: Date,
 ) -> List(Date) {
   let #(n, unit) = interval_to_units(interval)
-  let RD(first_rd) = ceiling(interval, start_date)
+  let RD(first_rd) = ceiling(start_date, interval)
   let RD(until_rd) = until_date
 
   case first_rd < until_rd {
@@ -2464,7 +2464,7 @@ fn range_help(
 ) -> List(Date) {
   case current_rd < until_rd {
     True -> {
-      let RD(next_rd) = add(unit, step, RD(current_rd))
+      let RD(next_rd) = add(RD(current_rd), step, unit)
       range_help(
         unit,
         step,
