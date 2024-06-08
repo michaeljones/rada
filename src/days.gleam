@@ -1899,7 +1899,7 @@ fn parse_day_of_year() {
     nibble.backtrackable(parse_month_and_day(False)),
     parse_ordinal_day(),
     parse_week_and_weekday(False),
-    nibble.succeed(OrdinalDay(1)),
+    nibble.eof() |> nibble.then(fn(_) { nibble.succeed(OrdinalDay(1)) }),
   ])
 }
 
@@ -1911,7 +1911,10 @@ fn parse_month_and_day(extended: Bool) {
   use day <- nibble.do(
     nibble.one_of([
       nibble.take_exactly(nibble.token(Dash), dash_count)
-        |> nibble.then(fn(_) { int_2() }),
+        |> nibble.then(fn(_) { int_2() })
+        |> nibble.then(fn(str) {
+          nibble.eof() |> nibble.then(fn(_) { nibble.succeed(str) })
+        }),
       nibble.eof() |> nibble.then(fn(_) { nibble.succeed(1) }),
     ]),
   )
@@ -1923,6 +1926,10 @@ fn parse_month_and_day(extended: Bool) {
 
 fn parse_ordinal_day() {
   use day <- nibble.do(int_3())
+  use _ <- nibble.do(nibble.eof())
+
+  io.println("ordinal day " <> string.inspect(day))
+
   nibble.return(OrdinalDay(day))
 }
 
@@ -1937,9 +1944,11 @@ fn parse_week_and_weekday(extended: Bool) {
     nibble.one_of([
       nibble.take_exactly(nibble.token(Dash), dash_count)
         |> nibble.then(fn(_) { int_1() }),
-      nibble.succeed(1),
+      nibble.eof() |> nibble.then(fn(_) { nibble.succeed(1) }),
     ]),
   )
+
+  io.println("week and weekday " <> string.inspect(WeekAndWeekday(week, day)))
 
   nibble.return(WeekAndWeekday(week, day))
 }

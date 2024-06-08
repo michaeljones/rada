@@ -1,6 +1,7 @@
 import gleam/int
 import gleam/io
 import gleam/list
+import gleam/result
 import gleam/string
 import gleeunit
 import gleeunit/should
@@ -1293,6 +1294,20 @@ pub fn from_iso_string_handles_extended_format_test() {
 //                 , "2018-5"
 //                 , "20180"
 //                 ]
+pub fn from_iso_string_returns_error_for_malformed_date_strings_test() {
+  list.each(
+    [
+      "200812-31", "2008-1231", "2009W01-4", "2009-W014", "2008-012-31",
+      "2008-12-031", "2008-0061", "2018-05-1", "2018-5", "20180",
+    ],
+    fn(string) {
+      io.println(string)
+      io.println(string.inspect(days.from_iso_string(string)))
+      days.from_iso_string(string) |> result.is_error() |> should.equal(True)
+    },
+  )
+}
+
 //         , describe "returns Err for invalid dates" <|
 //             List.map
 //                 (\( s, message ) -> test s <| \() -> Date.fromIsoString s |> equal (Err message))
