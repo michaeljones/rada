@@ -1906,21 +1906,15 @@ fn parse_day_of_year() {
 fn parse_month_and_day(extended: Bool) {
   use month <- nibble.do(int_2())
 
-  let expecting = case extended {
-    True -> "Expecting dash"
-    False -> "Expecting no dash"
-  }
+  let dash_count = bool.to_int(extended)
 
-  use _ <- nibble.do(
-    nibble.take_if(expecting, fn(token) {
-      case extended, token {
-        True, Dash -> True
-        _, _ -> False
-      }
-    }),
+  use day <- nibble.do(
+    nibble.one_of([
+      nibble.take_exactly(nibble.token(Dash), dash_count)
+        |> nibble.then(fn(_) { int_2() }),
+      nibble.eof() |> nibble.then(fn(_) { nibble.succeed(1) }),
+    ]),
   )
-
-  use day <- nibble.do(nibble.one_of([int_2(), nibble.succeed(1)]))
 
   io.println("month and day " <> string.inspect(MonthAndDay(month, day)))
 
@@ -1937,21 +1931,15 @@ fn parse_week_and_weekday(extended: Bool) {
 
   use week <- nibble.do(int_2())
 
-  let expecting = case extended {
-    True -> "Expecting dash"
-    False -> "Expecting no dash"
-  }
+  let dash_count = bool.to_int(extended)
 
-  use _ <- nibble.do(
-    nibble.take_if(expecting, fn(token) {
-      case extended, token {
-        True, Dash -> True
-        _, _ -> False
-      }
-    }),
+  use day <- nibble.do(
+    nibble.one_of([
+      nibble.take_exactly(nibble.token(Dash), dash_count)
+        |> nibble.then(fn(_) { int_1() }),
+      nibble.succeed(1),
+    ]),
   )
-
-  use day <- nibble.do(nibble.one_of([int_1(), nibble.succeed(1)]))
 
   nibble.return(WeekAndWeekday(week, day))
 }
