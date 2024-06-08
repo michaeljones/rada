@@ -2,7 +2,7 @@ import gleam/regex
 import nibble/lexer as nl
 
 pub type ParseDateToken {
-  Digits(String)
+  Digit(String)
   WeekToken
   Dash
 }
@@ -13,18 +13,14 @@ pub fn lexer() {
   let is_digits = fn(str) { regex.check(digits_regex, str) }
 
   nl.simple([
-    nl.custom(fn(mode, lexeme, next_grapheme) {
+    nl.custom(fn(mode, lexeme, _next_grapheme) {
       case lexeme {
         "" -> nl.Drop(mode)
         "W" -> nl.Keep(WeekToken, mode)
         "-" -> nl.Keep(Dash, mode)
         _ -> {
           case is_digits(lexeme) {
-            True ->
-              case is_digits(next_grapheme) {
-                True -> nl.Skip
-                False -> nl.Keep(Digits(lexeme), mode)
-              }
+            True -> nl.Keep(Digit(lexeme), mode)
             False -> nl.NoMatch
           }
         }

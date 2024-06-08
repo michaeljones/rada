@@ -12,7 +12,18 @@ pub fn lex_ordinal_date_test() {
     list_
     |> list.map(fn(entry) { entry.value })
   })
-  |> should.equal(Ok([dp.Digits("2019"), dp.Dash, dp.Digits("269")]))
+  |> should.equal(
+    Ok([
+      dp.Digit("2"),
+      dp.Digit("0"),
+      dp.Digit("1"),
+      dp.Digit("9"),
+      dp.Dash,
+      dp.Digit("2"),
+      dp.Digit("6"),
+      dp.Digit("9"),
+    ]),
+  )
 }
 
 pub fn lex_week_date_test() {
@@ -23,12 +34,16 @@ pub fn lex_week_date_test() {
   })
   |> should.equal(
     Ok([
-      dp.Digits("2018"),
+      dp.Digit("2"),
+      dp.Digit("0"),
+      dp.Digit("1"),
+      dp.Digit("8"),
       dp.Dash,
       dp.WeekToken,
-      dp.Digits("39"),
+      dp.Digit("3"),
+      dp.Digit("9"),
       dp.Dash,
-      dp.Digits("3"),
+      dp.Digit("3"),
     ]),
   )
 }
@@ -40,7 +55,18 @@ pub fn lex_calendar_date_test() {
     |> list.map(fn(entry) { entry.value })
   })
   |> should.equal(
-    Ok([dp.Digits("2018"), dp.Dash, dp.Digits("09"), dp.Dash, dp.Digits("26")]),
+    Ok([
+      dp.Digit("2"),
+      dp.Digit("0"),
+      dp.Digit("1"),
+      dp.Digit("8"),
+      dp.Dash,
+      dp.Digit("0"),
+      dp.Digit("9"),
+      dp.Dash,
+      dp.Digit("2"),
+      dp.Digit("6"),
+    ]),
   )
 }
 

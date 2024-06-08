@@ -9,7 +9,7 @@ import gleam/string
 import nibble
 import nibble/lexer as nibble_lexer
 
-import days/parse.{Dash, Digits, WeekToken} as days_parse
+import days/parse.{Dash, Digit, WeekToken} as days_parse
 import days/pattern.{type Token, Field, Literal}
 
 // module Date exposing
@@ -1731,8 +1731,18 @@ pub fn to_iso_format(date: Date) -> String {
 //         >> Result.mapError (List.head >> Maybe.map deadEndToString >> Maybe.withDefault "")
 pub fn from_iso_string(str: String) -> Result(Date, String) {
   let assert Ok(tokens) = nibble_lexer.run(str, days_parse.lexer())
-  nibble.run(tokens, parser())
-  |> result.map_error(fn(err) { string.inspect(err) })
+  io.println(string.inspect(tokens))
+  case nibble.run(tokens, parser()) {
+    Ok(Ok(value)) -> Ok(value)
+    Ok(Error(err)) -> Error(err)
+    Error(err) -> Error(string.inspect(err))
+  }
+  // |> result.then(fn(result) {
+  //   case result {
+  //     Ok(val) -> nibble.succeed(val)
+  // Error(err) -> nibble.fail(err)
+  // }
+  // })
 }
 
 // 
@@ -1816,23 +1826,9 @@ fn from_year_and_day_of_year(
 //             (fromYearAndDayOfYear >> resultToParser)
 fn parser() {
   use year <- nibble.do(int_4())
-  use _ <- nibble.do(nibble.token(Dash))
   use day_of_year <- nibble.do(parse_day_of_year())
 
-  case day_of_year {
-    MonthAndDay(month, day) -> {
-      nibble.return(from_calendar_date(year, number_to_month(month), day))
-    }
-    WeekAndWeekday(week, weekday) -> {
-      io.println(string.inspect(year))
-      io.println(string.inspect(week))
-      io.println(string.inspect(weekday))
-      nibble.return(from_week_date(year, week, number_to_weekday(weekday)))
-    }
-    OrdinalDay(ordinal_day) -> {
-      todo
-    }
-  }
+  nibble.return(from_year_and_day_of_year(year, day_of_year))
 }
 
 // 
@@ -1891,24 +1887,82 @@ fn parser() {
 //             (OrdinalDay 1)
 //         ]
 fn parse_day_of_year() {
-  nibble.one_of([parse_month_and_day(), parse_week_and_weekday()])
+  nibble.one_of([
+    nibble.token(Dash)
+      |> nibble.then(fn(_) {
+        nibble.one_of([
+          nibble.backtrackable(parse_ordinal_day()),
+          parse_month_and_day(True),
+          parse_week_and_weekday(True),
+        ])
+      }),
+    nibble.backtrackable(parse_month_and_day(False)),
+    parse_ordinal_day(),
+    parse_week_and_weekday(False),
+    nibble.succeed(OrdinalDay(1)),
+  ])
 }
 
-fn parse_month_and_day() {
+fn parse_month_and_day(extended: Bool) {
   use month <- nibble.do(int_2())
-  use _ <- nibble.do(nibble.token(Dash))
-  use day <- nibble.do(int_2())
+
+  let expecting = case extended {
+    True -> "Expecting dash"
+    False -> "Expecting no dash"
+  }
+
+  use _ <- nibble.do(
+    nibble.take_if(expecting, fn(token) {
+      case extended, token {
+        True, Dash -> True
+        _, _ -> False
+      }
+    }),
+  )
+
+  use day <- nibble.do(nibble.one_of([int_2(), nibble.succeed(1)]))
+
+  io.println("month and day " <> string.inspect(MonthAndDay(month, day)))
 
   nibble.return(MonthAndDay(month, day))
 }
 
-fn parse_week_and_weekday() {
+fn parse_ordinal_day() {
+  use day <- nibble.do(int_3())
+  nibble.return(OrdinalDay(day))
+}
+
+fn parse_week_and_weekday(extended: Bool) {
   use _ <- nibble.do(nibble.token(WeekToken))
+
   use week <- nibble.do(int_2())
-  use _ <- nibble.do(nibble.token(Dash))
-  use day <- nibble.do(int_1())
+
+  let expecting = case extended {
+    True -> "Expecting dash"
+    False -> "Expecting no dash"
+  }
+
+  use _ <- nibble.do(
+    nibble.take_if(expecting, fn(token) {
+      case extended, token {
+        True, Dash -> True
+        _, _ -> False
+      }
+    }),
+  )
+
+  use day <- nibble.do(nibble.one_of([int_1(), nibble.succeed(1)]))
 
   nibble.return(WeekAndWeekday(week, day))
+}
+
+fn parse_digit() {
+  nibble.take_if("Expecting digit", fn(token) {
+    case token {
+      Digit(_) -> True
+      _ -> False
+    }
+  })
 }
 
 // 
@@ -1927,18 +1981,17 @@ fn parse_week_and_weekday() {
 //         |> Parser.mapChompedString
 //             (\str _ -> String.toInt str |> Maybe.withDefault 0)
 fn int_4() {
-  use token <- nibble.do(
-    nibble.take_if("Expecting 4 digits", fn(token) {
-      case token {
-        Digits(str) -> {
-          string.length(str) == 4
-        }
-        _ -> False
-      }
-    }),
+  use tokens <- nibble.do(
+    parse_digit()
+    |> nibble.take_exactly(4),
   )
 
-  let assert Digits(str) = token
+  let str =
+    list.map(tokens, fn(token) {
+      let assert Digit(str) = token
+      str
+    })
+    |> string.concat
 
   let assert Ok(int) = int.parse(str)
 
@@ -1957,6 +2010,24 @@ fn int_4() {
 //             (\str _ -> String.toInt str |> Maybe.withDefault 0)
 // 
 // 
+fn int_3() {
+  use tokens <- nibble.do(
+    parse_digit()
+    |> nibble.take_exactly(3),
+  )
+
+  let str =
+    list.map(tokens, fn(token) {
+      let assert Digit(str) = token
+      str
+    })
+    |> string.concat
+
+  let assert Ok(int) = int.parse(str)
+
+  nibble.return(int)
+}
+
 // int2 : Parser Int
 // int2 =
 //     Parser.succeed ()
@@ -1965,18 +2036,17 @@ fn int_4() {
 //         |> Parser.mapChompedString
 //             (\str _ -> String.toInt str |> Maybe.withDefault 0)
 fn int_2() {
-  use token <- nibble.do(
-    nibble.take_if("Expecting 2 digits", fn(token) {
-      case token {
-        Digits(str) -> {
-          string.length(str) == 2
-        }
-        _ -> False
-      }
-    }),
+  use tokens <- nibble.do(
+    parse_digit()
+    |> nibble.take_exactly(2),
   )
 
-  let assert Digits(str) = token
+  let str =
+    list.map(tokens, fn(token) {
+      let assert Digit(str) = token
+      str
+    })
+    |> string.concat
 
   let assert Ok(int) = int.parse(str)
 
@@ -1991,18 +2061,12 @@ fn int_2() {
 //         |> Parser.mapChompedString
 //             (\str _ -> String.toInt str |> Maybe.withDefault 0)
 fn int_1() {
-  use token <- nibble.do(
-    nibble.take_if("Expecting 1 digits", fn(token) {
-      case token {
-        Digits(str) -> {
-          string.length(str) == 1
-        }
-        _ -> False
-      }
-    }),
+  use tokens <- nibble.do(
+    parse_digit()
+    |> nibble.take_exactly(1),
   )
 
-  let assert Digits(str) = token
+  let assert [Digit(str)] = tokens
 
   let assert Ok(int) = int.parse(str)
 

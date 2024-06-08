@@ -1238,6 +1238,26 @@ pub fn range_can_return_large_list_test() {
 //                 , ( "2009W014", ( 2009, Jan, 1 ) )
 //                 , ( "2008061", ( 2008, Mar, 1 ) )
 //                 ]
+fn test_from_iso_string(string: String, tuple) {
+  io.println("Parsing " <> string)
+  days.from_iso_string(string)
+  |> should.equal(Ok(tuple_to_calendar_date(tuple)))
+}
+
+pub fn from_iso_string_handles_basic_format_test() {
+  list.each(
+    [
+      #("2008", #(2008, days.Jan, 1)),
+      #("200812", #(2008, days.Dec, 1)),
+      #("20081231", #(2008, days.Dec, 31)),
+      #("2009W01", #(2008, days.Dec, 29)),
+      #("2009W014", #(2009, days.Jan, 1)),
+      #("2008061", #(2008, days.Mar, 1)),
+    ],
+    fn(entry) { test_from_iso_string(entry.0, entry.1) },
+  )
+}
+
 //         , describe "converts ISO 8601 date strings in extended format" <|
 //             List.map toTest
 //                 [ ( "2008-12", ( 2008, Dec, 1 ) )
@@ -1246,6 +1266,19 @@ pub fn range_can_return_large_list_test() {
 //                 , ( "2009-W01-4", ( 2009, Jan, 1 ) )
 //                 , ( "2008-061", ( 2008, Mar, 1 ) )
 //                 ]
+pub fn from_iso_string_handles_extended_format_test() {
+  list.each(
+    [
+      #("2008-12", #(2008, days.Dec, 1)),
+      #("2008-12-31", #(2008, days.Dec, 31)),
+      #("2009-W01", #(2008, days.Dec, 29)),
+      #("2009-W01-4", #(2009, days.Jan, 1)),
+      #("2008-061", #(2008, days.Mar, 1)),
+    ],
+    fn(entry) { test_from_iso_string(entry.0, entry.1) },
+  )
+}
+
 //         , describe "returns Err for malformed date strings" <|
 //             List.map
 //                 (\s -> test s <| \() -> Date.fromIsoString s |> extractErr "" |> String.startsWith "Expected a date" |> equal True)
