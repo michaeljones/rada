@@ -1,4 +1,3 @@
-import gleam/io
 import gleam/list
 import gleam/result
 import gleam/set
@@ -64,13 +63,6 @@ fn is_text(token: LexerToken) {
 fn is_quote(token: LexerToken) {
   case token {
     Quote -> True
-    _ -> False
-  }
-}
-
-fn is_escaped_quote(token: LexerToken) {
-  case token {
-    EscapedQuote -> True
     _ -> False
   }
 }

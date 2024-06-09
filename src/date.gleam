@@ -1,17 +1,16 @@
 import gleam/bool
 import gleam/float
 import gleam/int
-import gleam/io
 import gleam/list
-import gleam/option.{None, Some}
+import gleam/option
 import gleam/order.{type Order}
 import gleam/result
 import gleam/string
 import nibble
 import nibble/lexer as nibble_lexer
 
-import days/parse.{Dash, Digit, TimeToken, WeekToken} as days_parse
-import days/pattern.{type Token, Field, Literal}
+import date/parse.{Dash, Digit, TimeToken, WeekToken} as days_parse
+import date/pattern.{type Token, Field, Literal}
 
 // module Date exposing
 

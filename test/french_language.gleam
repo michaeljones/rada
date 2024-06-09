@@ -1,7 +1,7 @@
 import gleam/int
 import gleam/string
 
-import days
+import date
 
 // fr : Date.Language
 // fr =
@@ -12,7 +12,7 @@ import days
 //     , dayWithSuffix = fr_dayWithSuffix
 //     }
 pub fn language_fr() {
-  days.Language(
+  date.Language(
     month_name: fr_month_name,
     month_name_short: fr_month_name_short,
     weekday_name: fr_weekday_name,
@@ -61,20 +61,20 @@ pub fn language_fr() {
 
 //         Dec ->
 //             "décembre"
-fn fr_month_name(month: days.Month) {
+fn fr_month_name(month: date.Month) {
   case month {
-    days.Jan -> "janvier"
-    days.Feb -> "février"
-    days.Mar -> "mars"
-    days.Apr -> "avril"
-    days.May -> "mai"
-    days.Jun -> "juin"
-    days.Jul -> "juillet"
-    days.Aug -> "août"
-    days.Sep -> "septembre"
-    days.Oct -> "octobre"
-    days.Nov -> "novembre"
-    days.Dec -> "décembre"
+    date.Jan -> "janvier"
+    date.Feb -> "février"
+    date.Mar -> "mars"
+    date.Apr -> "avril"
+    date.May -> "mai"
+    date.Jun -> "juin"
+    date.Jul -> "juillet"
+    date.Aug -> "août"
+    date.Sep -> "septembre"
+    date.Oct -> "octobre"
+    date.Nov -> "novembre"
+    date.Dec -> "décembre"
   }
 }
 
@@ -116,20 +116,20 @@ fn fr_month_name(month: days.Month) {
 
 //         Dec ->
 //             "déc."
-fn fr_month_name_short(month: days.Month) {
+fn fr_month_name_short(month: date.Month) {
   case month {
-    days.Jan -> "janv."
-    days.Feb -> "févr."
-    days.Mar -> "mars"
-    days.Apr -> "avr."
-    days.May -> "mai"
-    days.Jun -> "juin"
-    days.Jul -> "juill."
-    days.Aug -> "août"
-    days.Sep -> "sept."
-    days.Oct -> "oct."
-    days.Nov -> "nov."
-    days.Dec -> "déc."
+    date.Jan -> "janv."
+    date.Feb -> "févr."
+    date.Mar -> "mars"
+    date.Apr -> "avr."
+    date.May -> "mai"
+    date.Jun -> "juin"
+    date.Jul -> "juill."
+    date.Aug -> "août"
+    date.Sep -> "sept."
+    date.Oct -> "oct."
+    date.Nov -> "nov."
+    date.Dec -> "déc."
   }
 }
 
@@ -156,15 +156,15 @@ fn fr_month_name_short(month: days.Month) {
 
 //         Sun ->
 //             "dimanche"
-fn fr_weekday_name(weekday: days.Weekday) {
+fn fr_weekday_name(weekday: date.Weekday) {
   case weekday {
-    days.Mon -> "lundi"
-    days.Tue -> "mardi"
-    days.Wed -> "mercredi"
-    days.Thu -> "jeudi"
-    days.Fri -> "vendredi"
-    days.Sat -> "samedi"
-    days.Sun -> "dimanche"
+    date.Mon -> "lundi"
+    date.Tue -> "mardi"
+    date.Wed -> "mercredi"
+    date.Thu -> "jeudi"
+    date.Fri -> "vendredi"
+    date.Sat -> "samedi"
+    date.Sun -> "dimanche"
   }
 }
 

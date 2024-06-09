@@ -3,8 +3,8 @@ import gleam/result
 import gleeunit/should
 import nibble/lexer as nl
 
-import days
-import days/parse as dp
+import date
+import date/parse as dp
 
 pub fn lex_ordinal_date_test() {
   nl.run("2019-269", dp.lexer())
@@ -71,11 +71,11 @@ pub fn lex_calendar_date_test() {
 }
 
 pub fn parse_calendar_date_test() {
-  days.from_iso_string("2018-09-26")
-  |> should.equal(Ok(days.from_calendar_date(2018, days.Sep, 26)))
+  date.from_iso_string("2018-09-26")
+  |> should.equal(Ok(date.from_calendar_date(2018, date.Sep, 26)))
 }
 
 pub fn parse_week_weekday_date_test() {
-  days.from_iso_string("2009-W01-4")
-  |> should.equal(Ok(days.from_calendar_date(2009, days.Jan, 1)))
+  date.from_iso_string("2009-W01-4")
+  |> should.equal(Ok(date.from_calendar_date(2009, date.Jan, 1)))
 }

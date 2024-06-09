@@ -1,13 +1,10 @@
-import gleam/int
-import gleam/io
 import gleam/list
 import gleam/order
 import gleam/result
-import gleam/string
 import gleeunit
 import gleeunit/should
 
-import days.{type CalendarDate, type Date, type WeekDate, CalendarDate, WeekDate}
+import date.{type CalendarDate, type Date, type WeekDate, CalendarDate, WeekDate}
 import french_language.{language_fr}
 
 pub fn main() {
@@ -15,10 +12,10 @@ pub fn main() {
 }
 
 pub fn leap_year_test() {
-  days.is_leap_year(2024)
+  date.is_leap_year(2024)
   |> should.equal(True)
 
-  days.is_leap_year(2022)
+  date.is_leap_year(2022)
   |> should.equal(False)
 }
 
@@ -118,12 +115,12 @@ pub fn rata_die_test() {
   |> list.map(fn(year) {
     year
     |> calendar_dates_in_year
-    |> list.map(fn(date) { date |> from_calendar_date |> days.to_rata_die })
+    |> list.map(fn(date) { date |> from_calendar_date |> date.to_rata_die })
   })
   |> list.concat
   |> should.equal(list.range(
-    days.from_calendar_date(1997, days.Jan, 1) |> days.to_rata_die,
-    days.from_calendar_date(2025, days.Dec, 31) |> days.to_rata_die,
+    date.from_calendar_date(1997, date.Jan, 1) |> date.to_rata_die,
+    date.from_calendar_date(2025, date.Dec, 31) |> date.to_rata_die,
   ))
 }
 
@@ -179,22 +176,22 @@ pub fn week_date_isomorphic_test() {
 
 pub fn week_date_sample_test() {
   [
-    #(CalendarDate(2005, days.Jan, 1), WeekDate(2004, 53, days.Sat)),
-    #(CalendarDate(2005, days.Jan, 2), WeekDate(2004, 53, days.Sun)),
-    #(CalendarDate(2005, days.Dec, 31), WeekDate(2005, 52, days.Sat)),
-    #(CalendarDate(2007, days.Jan, 1), WeekDate(2007, 1, days.Mon)),
-    #(CalendarDate(2007, days.Dec, 30), WeekDate(2007, 52, days.Sun)),
-    #(CalendarDate(2007, days.Dec, 31), WeekDate(2008, 1, days.Mon)),
-    #(CalendarDate(2008, days.Jan, 1), WeekDate(2008, 1, days.Tue)),
-    #(CalendarDate(2008, days.Dec, 28), WeekDate(2008, 52, days.Sun)),
-    #(CalendarDate(2008, days.Dec, 29), WeekDate(2009, 1, days.Mon)),
-    #(CalendarDate(2008, days.Dec, 30), WeekDate(2009, 1, days.Tue)),
-    #(CalendarDate(2008, days.Dec, 31), WeekDate(2009, 1, days.Wed)),
-    #(CalendarDate(2009, days.Jan, 1), WeekDate(2009, 1, days.Thu)),
-    #(CalendarDate(2009, days.Dec, 31), WeekDate(2009, 53, days.Thu)),
-    #(CalendarDate(2010, days.Jan, 1), WeekDate(2009, 53, days.Fri)),
-    #(CalendarDate(2010, days.Jan, 2), WeekDate(2009, 53, days.Sat)),
-    #(CalendarDate(2010, days.Jan, 3), WeekDate(2009, 53, days.Sun)),
+    #(CalendarDate(2005, date.Jan, 1), WeekDate(2004, 53, date.Sat)),
+    #(CalendarDate(2005, date.Jan, 2), WeekDate(2004, 53, date.Sun)),
+    #(CalendarDate(2005, date.Dec, 31), WeekDate(2005, 52, date.Sat)),
+    #(CalendarDate(2007, date.Jan, 1), WeekDate(2007, 1, date.Mon)),
+    #(CalendarDate(2007, date.Dec, 30), WeekDate(2007, 52, date.Sun)),
+    #(CalendarDate(2007, date.Dec, 31), WeekDate(2008, 1, date.Mon)),
+    #(CalendarDate(2008, date.Jan, 1), WeekDate(2008, 1, date.Tue)),
+    #(CalendarDate(2008, date.Dec, 28), WeekDate(2008, 52, date.Sun)),
+    #(CalendarDate(2008, date.Dec, 29), WeekDate(2009, 1, date.Mon)),
+    #(CalendarDate(2008, date.Dec, 30), WeekDate(2009, 1, date.Tue)),
+    #(CalendarDate(2008, date.Dec, 31), WeekDate(2009, 1, date.Wed)),
+    #(CalendarDate(2009, date.Jan, 1), WeekDate(2009, 1, date.Thu)),
+    #(CalendarDate(2009, date.Dec, 31), WeekDate(2009, 53, date.Thu)),
+    #(CalendarDate(2010, date.Jan, 1), WeekDate(2009, 53, date.Fri)),
+    #(CalendarDate(2010, date.Jan, 2), WeekDate(2009, 53, date.Sat)),
+    #(CalendarDate(2010, date.Jan, 3), WeekDate(2009, 53, date.Sun)),
   ]
   |> list.map(fn(tuple) {
     let #(calendar_date, week_date) = tuple
@@ -315,8 +312,8 @@ pub fn format_supported_character_pattern_test() {
     ],
     fn(tuple) {
       let #(pattern, text) = tuple
-      let date = days.from_calendar_date(2001, days.Jan, 2)
-      should.equal(days.format(date, pattern), text)
+      let date = date.from_calendar_date(2001, date.Jan, 2)
+      should.equal(date.format(date, pattern), text)
     },
   )
 }
@@ -327,9 +324,9 @@ pub fn format_supported_character_pattern_test() {
 //                 [ ( "ABCFGHIJKLNOPRSTUVWXZabcfghijklmnopqrstuvxz", "" )
 //                 ]
 pub fn format_removes_unsupported_pattern_characters_test() {
-  let date = days.from_calendar_date(2008, days.Dec, 31)
+  let date = date.from_calendar_date(2008, date.Dec, 31)
   date
-  |> days.format("ABCFGHIJKLNOPRSTUVWXZabcfghijklmnopqrstuvxz")
+  |> date.format("ABCFGHIJKLNOPRSTUVWXZabcfghijklmnopqrstuvxz")
   |> should.equal("")
 }
 
@@ -339,9 +336,9 @@ pub fn format_removes_unsupported_pattern_characters_test() {
 //                 [ ( "0123456789 .,\\//:-%", "0123456789 .,\\//:-%" )
 //                 ]
 pub fn format_ignores_non_alpha_characters_test() {
-  let date = days.from_calendar_date(2008, days.Dec, 31)
+  let date = date.from_calendar_date(2008, date.Dec, 31)
   date
-  |> days.format("0123456789 .,\\//:-%")
+  |> date.format("0123456789 .,\\//:-%")
   |> should.equal("0123456789 .,\\//:-%")
 }
 
@@ -353,7 +350,7 @@ pub fn format_ignores_non_alpha_characters_test() {
 //                 , ( "'yyyy:' yyyy", "yyyy: 2001" )
 //                 ]
 pub fn format_handles_escaped_characters_and_escaped_escape_characters_test() {
-  let date = days.from_calendar_date(2008, days.Dec, 31)
+  let date = date.from_calendar_date(2008, date.Dec, 31)
   list.each(
     [
       #("'yYQMwdDEe'", "yYQMwdDEe"),
@@ -363,7 +360,7 @@ pub fn format_handles_escaped_characters_and_escaped_escape_characters_test() {
     fn(tuple) {
       let #(pattern, text) = tuple
       date
-      |> days.format(pattern)
+      |> date.format(pattern)
       |> should.equal(text)
     },
   )
@@ -376,9 +373,9 @@ pub fn format_handles_escaped_characters_and_escaped_escape_characters_test() {
 //                 ]
 
 pub fn format_is_lenient_on_unclosed_quotes_test() {
-  let date = days.from_calendar_date(2008, days.Dec, 31)
+  let date = date.from_calendar_date(2008, date.Dec, 31)
   date
-  |> days.format("yyyy 'yyyy")
+  |> date.format("yyyy 'yyyy")
   |> should.equal("2008 yyyy")
 }
 
@@ -456,8 +453,8 @@ pub fn format_formats_day_ordinals_test() {
     ],
     fn(tuple) {
       let #(day, expected) = tuple
-      days.from_calendar_date(2008, days.Dec, day)
-      |> days.format("ddd")
+      date.from_calendar_date(2008, date.Dec, day)
+      |> date.format("ddd")
       |> should.equal(expected)
     },
   )
@@ -485,8 +482,8 @@ pub fn format_formats_with_sample_patterns_as_expected_test() {
     ],
     fn(tuple) {
       let #(pattern, expected) = tuple
-      days.from_calendar_date(2008, days.Dec, 31)
-      |> days.format(pattern)
+      date.from_calendar_date(2008, date.Dec, 31)
+      |> date.format(pattern)
       |> should.equal(expected)
     },
   )
@@ -542,8 +539,8 @@ pub fn format_with_language_test() {
     ],
     fn(tuple) {
       let #(pattern, expected) = tuple
-      days.from_calendar_date(2001, days.Jan, 1)
-      |> days.format_with_language(language_fr(), pattern)
+      date.from_calendar_date(2001, date.Jan, 1)
+      |> date.format_with_language(language_fr(), pattern)
       |> should.equal(expected)
     },
   )
@@ -566,14 +563,14 @@ pub fn format_with_language_test() {
 fn test_add(from_tuple, count, unit, to_tuple) {
   let #(from_year, from_month, from_day) = from_tuple
   let #(to_year, to_month, to_day) = to_tuple
-  days.from_calendar_date(from_year, from_month, from_day)
-  |> days.add(count, unit)
-  |> should.equal(days.from_calendar_date(to_year, to_month, to_day))
+  date.from_calendar_date(from_year, from_month, from_day)
+  |> date.add(count, unit)
+  |> should.equal(date.from_calendar_date(to_year, to_month, to_day))
 }
 
 pub fn add_zero_test() {
-  list.each([days.Years, days.Months, days.Weeks, days.Days], fn(unit) {
-    test_add(#(2000, days.Jan, 1), 0, unit, #(2000, days.Jan, 1))
+  list.each([date.Years, date.Months, date.Weeks, date.Days], fn(unit) {
+    test_add(#(2000, date.Jan, 1), 0, unit, #(2000, date.Jan, 1))
   })
 }
 
@@ -588,14 +585,14 @@ pub fn add_zero_test() {
 //             , toTest ( 2000, Jan, 1 ) 36 Days ( 2000, Feb, 6 )
 //             ]
 pub fn add_positive_numbers_test() {
-  test_add(#(2000, days.Jan, 1), 2, days.Years, #(2002, days.Jan, 1))
-  test_add(#(2000, days.Jan, 1), 2, days.Months, #(2000, days.Mar, 1))
-  test_add(#(2000, days.Jan, 1), 2, days.Weeks, #(2000, days.Jan, 15))
-  test_add(#(2000, days.Jan, 1), 2, days.Days, #(2000, days.Jan, 3))
-  test_add(#(2000, days.Jan, 1), 18, days.Years, #(2018, days.Jan, 1))
-  test_add(#(2000, days.Jan, 1), 18, days.Months, #(2001, days.Jul, 1))
-  test_add(#(2000, days.Jan, 1), 18, days.Weeks, #(2000, days.May, 6))
-  test_add(#(2000, days.Jan, 1), 36, days.Days, #(2000, days.Feb, 6))
+  test_add(#(2000, date.Jan, 1), 2, date.Years, #(2002, date.Jan, 1))
+  test_add(#(2000, date.Jan, 1), 2, date.Months, #(2000, date.Mar, 1))
+  test_add(#(2000, date.Jan, 1), 2, date.Weeks, #(2000, date.Jan, 15))
+  test_add(#(2000, date.Jan, 1), 2, date.Days, #(2000, date.Jan, 3))
+  test_add(#(2000, date.Jan, 1), 18, date.Years, #(2018, date.Jan, 1))
+  test_add(#(2000, date.Jan, 1), 18, date.Months, #(2001, date.Jul, 1))
+  test_add(#(2000, date.Jan, 1), 18, date.Weeks, #(2000, date.May, 6))
+  test_add(#(2000, date.Jan, 1), 36, date.Days, #(2000, date.Feb, 6))
 }
 
 //         , describe "adding negative numbers works as expected"
@@ -609,14 +606,14 @@ pub fn add_positive_numbers_test() {
 //             , toTest ( 2000, Jan, 1 ) -18 Days ( 1999, Dec, 14 )
 //             ]
 pub fn add_negative_numbers_test() {
-  test_add(#(2000, days.Jan, 1), -2, days.Years, #(1998, days.Jan, 1))
-  test_add(#(2000, days.Jan, 1), -2, days.Months, #(1999, days.Nov, 1))
-  test_add(#(2000, days.Jan, 1), -2, days.Weeks, #(1999, days.Dec, 18))
-  test_add(#(2000, days.Jan, 1), -2, days.Days, #(1999, days.Dec, 30))
-  test_add(#(2000, days.Jan, 1), -18, days.Years, #(1982, days.Jan, 1))
-  test_add(#(2000, days.Jan, 1), -18, days.Months, #(1998, days.Jul, 1))
-  test_add(#(2000, days.Jan, 1), -18, days.Weeks, #(1999, days.Aug, 28))
-  test_add(#(2000, days.Jan, 1), -18, days.Days, #(1999, days.Dec, 14))
+  test_add(#(2000, date.Jan, 1), -2, date.Years, #(1998, date.Jan, 1))
+  test_add(#(2000, date.Jan, 1), -2, date.Months, #(1999, date.Nov, 1))
+  test_add(#(2000, date.Jan, 1), -2, date.Weeks, #(1999, date.Dec, 18))
+  test_add(#(2000, date.Jan, 1), -2, date.Days, #(1999, date.Dec, 30))
+  test_add(#(2000, date.Jan, 1), -18, date.Years, #(1982, date.Jan, 1))
+  test_add(#(2000, date.Jan, 1), -18, date.Months, #(1998, date.Jul, 1))
+  test_add(#(2000, date.Jan, 1), -18, date.Weeks, #(1999, date.Aug, 28))
+  test_add(#(2000, date.Jan, 1), -18, date.Days, #(1999, date.Dec, 14))
 }
 
 //         , describe "adding Years from a leap day clamps overflow to the end of February"
@@ -624,8 +621,8 @@ pub fn add_negative_numbers_test() {
 //             , toTest ( 2000, Feb, 29 ) 4 Years ( 2004, Feb, 29 )
 //             ]
 pub fn add_years_from_a_leap_day_clamps_to_end_of_feb_test() {
-  test_add(#(2000, days.Feb, 29), 1, days.Years, #(2001, days.Feb, 28))
-  test_add(#(2000, days.Feb, 29), 4, days.Years, #(2004, days.Feb, 29))
+  test_add(#(2000, date.Feb, 29), 1, date.Years, #(2001, date.Feb, 28))
+  test_add(#(2000, date.Feb, 29), 4, date.Years, #(2004, date.Feb, 29))
 }
 
 //         , describe "adding Months clamps overflow to the end of a short month"
@@ -636,10 +633,10 @@ pub fn add_years_from_a_leap_day_clamps_to_end_of_feb_test() {
 //             ]
 //         ]
 pub fn add_months_clamps_to_end_of_short_month_test() {
-  test_add(#(2000, days.Jan, 31), 1, days.Months, #(2000, days.Feb, 29))
-  test_add(#(2000, days.Jan, 31), 2, days.Months, #(2000, days.Mar, 31))
-  test_add(#(2000, days.Jan, 31), 3, days.Months, #(2000, days.Apr, 30))
-  test_add(#(2000, days.Jan, 31), 13, days.Months, #(2001, days.Feb, 28))
+  test_add(#(2000, date.Jan, 31), 1, date.Months, #(2000, date.Feb, 29))
+  test_add(#(2000, date.Jan, 31), 2, date.Months, #(2000, date.Mar, 31))
+  test_add(#(2000, date.Jan, 31), 3, date.Months, #(2000, date.Apr, 30))
+  test_add(#(2000, date.Jan, 31), 13, date.Months, #(2001, date.Feb, 28))
 }
 
 // test_diff : Test
@@ -659,16 +656,16 @@ pub fn add_months_clamps_to_end_of_short_month_test() {
 fn test_diff(from_tuple, to_tuple, count, unit) {
   let #(from_year, from_month, from_day) = from_tuple
   let #(to_year, to_month, to_day) = to_tuple
-  let from_date = days.from_calendar_date(from_year, from_month, from_day)
-  let to_date = days.from_calendar_date(to_year, to_month, to_day)
+  let from_date = date.from_calendar_date(from_year, from_month, from_day)
+  let to_date = date.from_calendar_date(to_year, to_month, to_day)
 
-  days.diff(unit, from_date, to_date)
+  date.diff(unit, from_date, to_date)
   |> should.equal(count)
 }
 
 pub fn diff_same_date_diff_units_test() {
-  list.each([days.Years, days.Months, days.Weeks, days.Days], fn(unit) {
-    test_diff(#(2000, days.Jan, 1), #(2000, days.Jan, 1), 0, unit)
+  list.each([date.Years, date.Months, date.Weeks, date.Days], fn(unit) {
+    test_diff(#(2000, date.Jan, 1), #(2000, date.Jan, 1), 0, unit)
   })
 }
 
@@ -681,12 +678,12 @@ pub fn diff_same_date_diff_units_test() {
 //                 (\unit -> test (Debug.toString unit) <| \() -> Date.diff unit x y |> equal (negate (Date.diff unit y x)))
 //                 [ Years, Months, Weeks, Days ]
 pub fn diff_inverts_correctly_test() {
-  list.each([days.Years, days.Months, days.Weeks, days.Days], fn(unit) {
-    let from_date = days.from_calendar_date(2000, days.Jan, 1)
-    let to_date = days.from_calendar_date(2017, days.Sep, 28)
+  list.each([date.Years, date.Months, date.Weeks, date.Days], fn(unit) {
+    let from_date = date.from_calendar_date(2000, date.Jan, 1)
+    let to_date = date.from_calendar_date(2017, date.Sep, 28)
     should.equal(
-      days.diff(unit, from_date, to_date),
-      -1 * days.diff(unit, to_date, from_date),
+      date.diff(unit, from_date, to_date),
+      -1 * date.diff(unit, to_date, from_date),
     )
   })
 }
@@ -702,14 +699,14 @@ pub fn diff_inverts_correctly_test() {
 //             , toTest ( 2000, Jan, 1 ) ( 2000, Feb, 6 ) 36 Days
 //             ]
 pub fn diff_earlier_later_is_positive_test() {
-  test_diff(#(2000, days.Jan, 1), #(2002, days.Jan, 1), 2, days.Years)
-  test_diff(#(2000, days.Jan, 1), #(2000, days.Mar, 1), 2, days.Months)
-  test_diff(#(2000, days.Jan, 1), #(2000, days.Jan, 15), 2, days.Weeks)
-  test_diff(#(2000, days.Jan, 1), #(2000, days.Jan, 3), 2, days.Days)
-  test_diff(#(2000, days.Jan, 1), #(2018, days.Jan, 1), 18, days.Years)
-  test_diff(#(2000, days.Jan, 1), #(2001, days.Jul, 1), 18, days.Months)
-  test_diff(#(2000, days.Jan, 1), #(2000, days.May, 6), 18, days.Weeks)
-  test_diff(#(2000, days.Jan, 1), #(2000, days.Feb, 6), 36, days.Days)
+  test_diff(#(2000, date.Jan, 1), #(2002, date.Jan, 1), 2, date.Years)
+  test_diff(#(2000, date.Jan, 1), #(2000, date.Mar, 1), 2, date.Months)
+  test_diff(#(2000, date.Jan, 1), #(2000, date.Jan, 15), 2, date.Weeks)
+  test_diff(#(2000, date.Jan, 1), #(2000, date.Jan, 3), 2, date.Days)
+  test_diff(#(2000, date.Jan, 1), #(2018, date.Jan, 1), 18, date.Years)
+  test_diff(#(2000, date.Jan, 1), #(2001, date.Jul, 1), 18, date.Months)
+  test_diff(#(2000, date.Jan, 1), #(2000, date.May, 6), 18, date.Weeks)
+  test_diff(#(2000, date.Jan, 1), #(2000, date.Feb, 6), 36, date.Days)
 }
 
 //         , describe "`diff later earlier` results in negative numbers"
@@ -723,14 +720,14 @@ pub fn diff_earlier_later_is_positive_test() {
 //             , toTest ( 2000, Jan, 1 ) ( 1999, Dec, 14 ) -18 Days
 //             ]
 pub fn diff_later_earlier_is_negative_test() {
-  test_diff(#(2000, days.Jan, 1), #(1998, days.Jan, 1), -2, days.Years)
-  test_diff(#(2000, days.Jan, 1), #(1999, days.Nov, 1), -2, days.Months)
-  test_diff(#(2000, days.Jan, 1), #(1999, days.Dec, 18), -2, days.Weeks)
-  test_diff(#(2000, days.Jan, 1), #(1999, days.Dec, 30), -2, days.Days)
-  test_diff(#(2000, days.Jan, 1), #(1982, days.Jan, 1), -18, days.Years)
-  test_diff(#(2000, days.Jan, 1), #(1998, days.Jul, 1), -18, days.Months)
-  test_diff(#(2000, days.Jan, 1), #(1999, days.Aug, 28), -18, days.Weeks)
-  test_diff(#(2000, days.Jan, 1), #(1999, days.Dec, 14), -18, days.Days)
+  test_diff(#(2000, date.Jan, 1), #(1998, date.Jan, 1), -2, date.Years)
+  test_diff(#(2000, date.Jan, 1), #(1999, date.Nov, 1), -2, date.Months)
+  test_diff(#(2000, date.Jan, 1), #(1999, date.Dec, 18), -2, date.Weeks)
+  test_diff(#(2000, date.Jan, 1), #(1999, date.Dec, 30), -2, date.Days)
+  test_diff(#(2000, date.Jan, 1), #(1982, date.Jan, 1), -18, date.Years)
+  test_diff(#(2000, date.Jan, 1), #(1998, date.Jul, 1), -18, date.Months)
+  test_diff(#(2000, date.Jan, 1), #(1999, date.Aug, 28), -18, date.Weeks)
+  test_diff(#(2000, date.Jan, 1), #(1999, date.Dec, 14), -18, date.Days)
 }
 
 //         , describe "diffing Years returns a number of whole years as determined by calendar date (anniversary)"
@@ -738,8 +735,8 @@ pub fn diff_later_earlier_is_negative_test() {
 //             , toTest ( 2000, Feb, 29 ) ( 2004, Feb, 29 ) 4 Years
 //             ]
 pub fn diff_diffing_years_handles_leap_years_test() {
-  test_diff(#(2000, days.Feb, 29), #(2001, days.Feb, 28), 0, days.Years)
-  test_diff(#(2000, days.Feb, 29), #(2004, days.Feb, 29), 4, days.Years)
+  test_diff(#(2000, date.Feb, 29), #(2001, date.Feb, 28), 0, date.Years)
+  test_diff(#(2000, date.Feb, 29), #(2004, date.Feb, 29), 4, date.Years)
 }
 
 //         , describe "diffing Months returns a number of whole months as determined by calendar date"
@@ -750,10 +747,10 @@ pub fn diff_diffing_years_handles_leap_years_test() {
 //             ]
 
 pub fn diff_diffing_months_handles_leap_year_febs_test() {
-  test_diff(#(2000, days.Jan, 31), #(2000, days.Feb, 29), 0, days.Months)
-  test_diff(#(2000, days.Jan, 31), #(2000, days.Mar, 31), 2, days.Months)
-  test_diff(#(2000, days.Jan, 31), #(2000, days.Apr, 30), 2, days.Months)
-  test_diff(#(2000, days.Jan, 31), #(2001, days.Feb, 28), 12, days.Months)
+  test_diff(#(2000, date.Jan, 31), #(2000, date.Feb, 29), 0, date.Months)
+  test_diff(#(2000, date.Jan, 31), #(2000, date.Mar, 31), 2, date.Months)
+  test_diff(#(2000, date.Jan, 31), #(2000, date.Apr, 30), 2, date.Months)
+  test_diff(#(2000, date.Jan, 31), #(2001, date.Feb, 28), 12, date.Months)
 }
 
 //         ]
@@ -789,26 +786,26 @@ fn test_floor(interval, input_tuple, expected_tuple) {
   let input_date = tuple_to_calendar_date(input_tuple)
   let expected_date = tuple_to_calendar_date(expected_tuple)
 
-  days.floor(input_date, interval)
+  date.floor(input_date, interval)
   |> should.equal(expected_date)
 
   // Check that calling it twice is the same as calling it once
-  expect_idempotence(fn(date) { days.floor(date, interval) }, input_date)
+  expect_idempotence(fn(date) { date.floor(date, interval) }, input_date)
 }
 
 pub fn floor_does_not_affect_already_rounded_date_test() {
-  test_floor(days.Year, #(2000, days.Jan, 1), #(2000, days.Jan, 1))
-  test_floor(days.Quarter, #(2000, days.Jan, 1), #(2000, days.Jan, 1))
-  test_floor(days.Month, #(2000, days.Jan, 1), #(2000, days.Jan, 1))
-  test_floor(days.Week, #(2000, days.Jan, 3), #(2000, days.Jan, 3))
-  test_floor(days.Monday, #(2000, days.Jan, 3), #(2000, days.Jan, 3))
-  test_floor(days.Tuesday, #(2000, days.Jan, 4), #(2000, days.Jan, 4))
-  test_floor(days.Wednesday, #(2000, days.Jan, 5), #(2000, days.Jan, 5))
-  test_floor(days.Thursday, #(2000, days.Jan, 6), #(2000, days.Jan, 6))
-  test_floor(days.Friday, #(2000, days.Jan, 7), #(2000, days.Jan, 7))
-  test_floor(days.Saturday, #(2000, days.Jan, 1), #(2000, days.Jan, 1))
-  test_floor(days.Sunday, #(2000, days.Jan, 2), #(2000, days.Jan, 2))
-  test_floor(days.Day, #(2000, days.Jan, 1), #(2000, days.Jan, 1))
+  test_floor(date.Year, #(2000, date.Jan, 1), #(2000, date.Jan, 1))
+  test_floor(date.Quarter, #(2000, date.Jan, 1), #(2000, date.Jan, 1))
+  test_floor(date.Month, #(2000, date.Jan, 1), #(2000, date.Jan, 1))
+  test_floor(date.Week, #(2000, date.Jan, 3), #(2000, date.Jan, 3))
+  test_floor(date.Monday, #(2000, date.Jan, 3), #(2000, date.Jan, 3))
+  test_floor(date.Tuesday, #(2000, date.Jan, 4), #(2000, date.Jan, 4))
+  test_floor(date.Wednesday, #(2000, date.Jan, 5), #(2000, date.Jan, 5))
+  test_floor(date.Thursday, #(2000, date.Jan, 6), #(2000, date.Jan, 6))
+  test_floor(date.Friday, #(2000, date.Jan, 7), #(2000, date.Jan, 7))
+  test_floor(date.Saturday, #(2000, date.Jan, 1), #(2000, date.Jan, 1))
+  test_floor(date.Sunday, #(2000, date.Jan, 2), #(2000, date.Jan, 2))
+  test_floor(date.Day, #(2000, date.Jan, 1), #(2000, date.Jan, 1))
 }
 
 //         , describe "returns the previous rounded interval"
@@ -826,18 +823,18 @@ pub fn floor_does_not_affect_already_rounded_date_test() {
 //             , toTest Day ( 2000, May, 21 ) ( 2000, May, 21 )
 //             ]
 pub fn floor_rounds_as_expected_test() {
-  test_floor(days.Year, #(2000, days.May, 21), #(2000, days.Jan, 1))
-  test_floor(days.Quarter, #(2000, days.May, 21), #(2000, days.Apr, 1))
-  test_floor(days.Month, #(2000, days.May, 21), #(2000, days.May, 1))
-  test_floor(days.Week, #(2000, days.May, 21), #(2000, days.May, 15))
-  test_floor(days.Monday, #(2000, days.May, 21), #(2000, days.May, 15))
-  test_floor(days.Tuesday, #(2000, days.May, 21), #(2000, days.May, 16))
-  test_floor(days.Wednesday, #(2000, days.May, 21), #(2000, days.May, 17))
-  test_floor(days.Thursday, #(2000, days.May, 21), #(2000, days.May, 18))
-  test_floor(days.Friday, #(2000, days.May, 21), #(2000, days.May, 19))
-  test_floor(days.Saturday, #(2000, days.May, 21), #(2000, days.May, 20))
-  test_floor(days.Sunday, #(2000, days.May, 22), #(2000, days.May, 21))
-  test_floor(days.Day, #(2000, days.May, 21), #(2000, days.May, 21))
+  test_floor(date.Year, #(2000, date.May, 21), #(2000, date.Jan, 1))
+  test_floor(date.Quarter, #(2000, date.May, 21), #(2000, date.Apr, 1))
+  test_floor(date.Month, #(2000, date.May, 21), #(2000, date.May, 1))
+  test_floor(date.Week, #(2000, date.May, 21), #(2000, date.May, 15))
+  test_floor(date.Monday, #(2000, date.May, 21), #(2000, date.May, 15))
+  test_floor(date.Tuesday, #(2000, date.May, 21), #(2000, date.May, 16))
+  test_floor(date.Wednesday, #(2000, date.May, 21), #(2000, date.May, 17))
+  test_floor(date.Thursday, #(2000, date.May, 21), #(2000, date.May, 18))
+  test_floor(date.Friday, #(2000, date.May, 21), #(2000, date.May, 19))
+  test_floor(date.Saturday, #(2000, date.May, 21), #(2000, date.May, 20))
+  test_floor(date.Sunday, #(2000, date.May, 22), #(2000, date.May, 21))
+  test_floor(date.Day, #(2000, date.May, 21), #(2000, date.May, 21))
 }
 
 //         , describe "rounds to Quarter as expected" <|
@@ -852,15 +849,15 @@ pub fn floor_rounds_as_expected_test() {
 pub fn floor_rounds_to_quarter_test() {
   list.each(
     [
-      #([days.Jan, days.Feb, days.Mar], #(2000, days.Jan, 1)),
-      #([days.Apr, days.May, days.Jun], #(2000, days.Apr, 1)),
-      #([days.Jul, days.Aug, days.Sep], #(2000, days.Jul, 1)),
-      #([days.Oct, days.Nov, days.Dec], #(2000, days.Oct, 1)),
+      #([date.Jan, date.Feb, date.Mar], #(2000, date.Jan, 1)),
+      #([date.Apr, date.May, date.Jun], #(2000, date.Apr, 1)),
+      #([date.Jul, date.Aug, date.Sep], #(2000, date.Jul, 1)),
+      #([date.Oct, date.Nov, date.Dec], #(2000, date.Oct, 1)),
     ],
     fn(tuple) {
       let #(months, expected) = tuple
       list.each(months, fn(month) {
-        test_floor(days.Quarter, #(2000, month, 15), expected)
+        test_floor(date.Quarter, #(2000, month, 15), expected)
       })
     },
   )
@@ -897,26 +894,26 @@ fn test_ceiling(interval, input_tuple, expected_tuple) {
   let input_date = tuple_to_calendar_date(input_tuple)
   let expected_date = tuple_to_calendar_date(expected_tuple)
 
-  days.ceiling(input_date, interval)
+  date.ceiling(input_date, interval)
   |> should.equal(expected_date)
 
   // Check that calling it twice is the same as calling it once
-  expect_idempotence(fn(date) { days.floor(date, interval) }, input_date)
+  expect_idempotence(fn(date) { date.floor(date, interval) }, input_date)
 }
 
 pub fn ceiling_does_not_affect_already_rounded_date_test() {
-  test_ceiling(days.Year, #(2000, days.Jan, 1), #(2000, days.Jan, 1))
-  test_ceiling(days.Quarter, #(2000, days.Jan, 1), #(2000, days.Jan, 1))
-  test_ceiling(days.Month, #(2000, days.Jan, 1), #(2000, days.Jan, 1))
-  test_ceiling(days.Week, #(2000, days.Jan, 3), #(2000, days.Jan, 3))
-  test_ceiling(days.Monday, #(2000, days.Jan, 3), #(2000, days.Jan, 3))
-  test_ceiling(days.Tuesday, #(2000, days.Jan, 4), #(2000, days.Jan, 4))
-  test_ceiling(days.Wednesday, #(2000, days.Jan, 5), #(2000, days.Jan, 5))
-  test_ceiling(days.Thursday, #(2000, days.Jan, 6), #(2000, days.Jan, 6))
-  test_ceiling(days.Friday, #(2000, days.Jan, 7), #(2000, days.Jan, 7))
-  test_ceiling(days.Saturday, #(2000, days.Jan, 1), #(2000, days.Jan, 1))
-  test_ceiling(days.Sunday, #(2000, days.Jan, 2), #(2000, days.Jan, 2))
-  test_ceiling(days.Day, #(2000, days.Jan, 1), #(2000, days.Jan, 1))
+  test_ceiling(date.Year, #(2000, date.Jan, 1), #(2000, date.Jan, 1))
+  test_ceiling(date.Quarter, #(2000, date.Jan, 1), #(2000, date.Jan, 1))
+  test_ceiling(date.Month, #(2000, date.Jan, 1), #(2000, date.Jan, 1))
+  test_ceiling(date.Week, #(2000, date.Jan, 3), #(2000, date.Jan, 3))
+  test_ceiling(date.Monday, #(2000, date.Jan, 3), #(2000, date.Jan, 3))
+  test_ceiling(date.Tuesday, #(2000, date.Jan, 4), #(2000, date.Jan, 4))
+  test_ceiling(date.Wednesday, #(2000, date.Jan, 5), #(2000, date.Jan, 5))
+  test_ceiling(date.Thursday, #(2000, date.Jan, 6), #(2000, date.Jan, 6))
+  test_ceiling(date.Friday, #(2000, date.Jan, 7), #(2000, date.Jan, 7))
+  test_ceiling(date.Saturday, #(2000, date.Jan, 1), #(2000, date.Jan, 1))
+  test_ceiling(date.Sunday, #(2000, date.Jan, 2), #(2000, date.Jan, 2))
+  test_ceiling(date.Day, #(2000, date.Jan, 1), #(2000, date.Jan, 1))
 }
 
 //         , describe "returns the next rounded interval"
@@ -933,18 +930,18 @@ pub fn ceiling_does_not_affect_already_rounded_date_test() {
 //             , toTest Sunday ( 2000, May, 22 ) ( 2000, May, 28 )
 //             , toTest Day ( 2000, May, 21 ) ( 2000, May, 21 )
 pub fn ceiling_returns_next_rounded_interval_test() {
-  test_ceiling(days.Year, #(2000, days.May, 21), #(2001, days.Jan, 1))
-  test_ceiling(days.Quarter, #(2000, days.May, 21), #(2000, days.Jul, 1))
-  test_ceiling(days.Month, #(2000, days.May, 21), #(2000, days.Jun, 1))
-  test_ceiling(days.Week, #(2000, days.May, 21), #(2000, days.May, 22))
-  test_ceiling(days.Monday, #(2000, days.May, 21), #(2000, days.May, 22))
-  test_ceiling(days.Tuesday, #(2000, days.May, 21), #(2000, days.May, 23))
-  test_ceiling(days.Wednesday, #(2000, days.May, 21), #(2000, days.May, 24))
-  test_ceiling(days.Thursday, #(2000, days.May, 21), #(2000, days.May, 25))
-  test_ceiling(days.Friday, #(2000, days.May, 21), #(2000, days.May, 26))
-  test_ceiling(days.Saturday, #(2000, days.May, 21), #(2000, days.May, 27))
-  test_ceiling(days.Sunday, #(2000, days.May, 22), #(2000, days.May, 28))
-  test_ceiling(days.Day, #(2000, days.May, 21), #(2000, days.May, 21))
+  test_ceiling(date.Year, #(2000, date.May, 21), #(2001, date.Jan, 1))
+  test_ceiling(date.Quarter, #(2000, date.May, 21), #(2000, date.Jul, 1))
+  test_ceiling(date.Month, #(2000, date.May, 21), #(2000, date.Jun, 1))
+  test_ceiling(date.Week, #(2000, date.May, 21), #(2000, date.May, 22))
+  test_ceiling(date.Monday, #(2000, date.May, 21), #(2000, date.May, 22))
+  test_ceiling(date.Tuesday, #(2000, date.May, 21), #(2000, date.May, 23))
+  test_ceiling(date.Wednesday, #(2000, date.May, 21), #(2000, date.May, 24))
+  test_ceiling(date.Thursday, #(2000, date.May, 21), #(2000, date.May, 25))
+  test_ceiling(date.Friday, #(2000, date.May, 21), #(2000, date.May, 26))
+  test_ceiling(date.Saturday, #(2000, date.May, 21), #(2000, date.May, 27))
+  test_ceiling(date.Sunday, #(2000, date.May, 22), #(2000, date.May, 28))
+  test_ceiling(date.Day, #(2000, date.May, 21), #(2000, date.May, 21))
 }
 
 //             ]
@@ -959,15 +956,15 @@ pub fn ceiling_returns_next_rounded_interval_test() {
 pub fn ceiling_rounds_to_quarter_test() {
   list.each(
     [
-      #([days.Jan, days.Feb, days.Mar], #(2000, days.Apr, 1)),
-      #([days.Apr, days.May, days.Jun], #(2000, days.Jul, 1)),
-      #([days.Jul, days.Aug, days.Sep], #(2000, days.Oct, 1)),
-      #([days.Oct, days.Nov, days.Dec], #(2001, days.Jan, 1)),
+      #([date.Jan, date.Feb, date.Mar], #(2000, date.Apr, 1)),
+      #([date.Apr, date.May, date.Jun], #(2000, date.Jul, 1)),
+      #([date.Jul, date.Aug, date.Sep], #(2000, date.Oct, 1)),
+      #([date.Oct, date.Nov, date.Dec], #(2001, date.Jan, 1)),
     ],
     fn(tuple) {
       let #(months, expected) = tuple
       list.each(months, fn(month) {
-        test_ceiling(days.Quarter, #(2000, month, 15), expected)
+        test_ceiling(date.Quarter, #(2000, month, 15), expected)
       })
     },
   )
@@ -1051,81 +1048,81 @@ pub fn ceiling_rounds_to_quarter_test() {
 fn test_range(unit, step, start_tuple, end_tuple, expected_tuples) {
   let start_date = tuple_to_calendar_date(start_tuple)
   let end_date = tuple_to_calendar_date(end_tuple)
-  days.range(unit, step, start_date, end_date)
+  date.range(unit, step, start_date, end_date)
   |> should.equal(expected_tuples |> list.map(tuple_to_calendar_date))
 }
 
 pub fn range_returns_list_of_dates_test() {
-  test_range(days.Year, 10, #(2000, days.Jan, 1), #(2030, days.Jan, 1), [
-    #(2000, days.Jan, 1),
-    #(2010, days.Jan, 1),
-    #(2020, days.Jan, 1),
+  test_range(date.Year, 10, #(2000, date.Jan, 1), #(2030, date.Jan, 1), [
+    #(2000, date.Jan, 1),
+    #(2010, date.Jan, 1),
+    #(2020, date.Jan, 1),
   ])
 
-  test_range(days.Quarter, 1, #(2000, days.Jan, 1), #(2000, days.Sep, 1), [
-    #(2000, days.Jan, 1),
-    #(2000, days.Apr, 1),
-    #(2000, days.Jul, 1),
+  test_range(date.Quarter, 1, #(2000, date.Jan, 1), #(2000, date.Sep, 1), [
+    #(2000, date.Jan, 1),
+    #(2000, date.Apr, 1),
+    #(2000, date.Jul, 1),
   ])
 
-  test_range(days.Month, 2, #(2000, days.Jan, 1), #(2000, days.Jul, 1), [
-    #(2000, days.Jan, 1),
-    #(2000, days.Mar, 1),
-    #(2000, days.May, 1),
+  test_range(date.Month, 2, #(2000, date.Jan, 1), #(2000, date.Jul, 1), [
+    #(2000, date.Jan, 1),
+    #(2000, date.Mar, 1),
+    #(2000, date.May, 1),
   ])
 
-  test_range(days.Week, 2, #(2000, days.Jan, 1), #(2000, days.Feb, 14), [
-    #(2000, days.Jan, 3),
-    #(2000, days.Jan, 17),
-    #(2000, days.Jan, 31),
+  test_range(date.Week, 2, #(2000, date.Jan, 1), #(2000, date.Feb, 14), [
+    #(2000, date.Jan, 3),
+    #(2000, date.Jan, 17),
+    #(2000, date.Jan, 31),
   ])
 
-  test_range(days.Monday, 2, #(2000, days.Jan, 1), #(2000, days.Feb, 14), [
-    #(2000, days.Jan, 3),
-    #(2000, days.Jan, 17),
-    #(2000, days.Jan, 31),
+  test_range(date.Monday, 2, #(2000, date.Jan, 1), #(2000, date.Feb, 14), [
+    #(2000, date.Jan, 3),
+    #(2000, date.Jan, 17),
+    #(2000, date.Jan, 31),
   ])
 
-  test_range(days.Tuesday, 2, #(2000, days.Jan, 1), #(2000, days.Feb, 15), [
-    #(2000, days.Jan, 4),
-    #(2000, days.Jan, 18),
-    #(2000, days.Feb, 1),
+  test_range(date.Tuesday, 2, #(2000, date.Jan, 1), #(2000, date.Feb, 15), [
+    #(2000, date.Jan, 4),
+    #(2000, date.Jan, 18),
+    #(2000, date.Feb, 1),
   ])
 
-  test_range(days.Wednesday, 2, #(2000, days.Jan, 1), #(2000, days.Feb, 16), [
-    #(2000, days.Jan, 5),
-    #(2000, days.Jan, 19),
-    #(2000, days.Feb, 2),
+  test_range(date.Wednesday, 2, #(2000, date.Jan, 1), #(2000, date.Feb, 16), [
+    #(2000, date.Jan, 5),
+    #(2000, date.Jan, 19),
+    #(2000, date.Feb, 2),
   ])
 
-  test_range(days.Thursday, 2, #(2000, days.Jan, 1), #(2000, days.Feb, 17), [
-    #(2000, days.Jan, 6),
-    #(2000, days.Jan, 20),
-    #(2000, days.Feb, 3),
+  test_range(date.Thursday, 2, #(2000, date.Jan, 1), #(2000, date.Feb, 17), [
+    #(2000, date.Jan, 6),
+    #(2000, date.Jan, 20),
+    #(2000, date.Feb, 3),
   ])
 
-  test_range(days.Friday, 2, #(2000, days.Jan, 1), #(2000, days.Feb, 18), [
-    #(2000, days.Jan, 7),
-    #(2000, days.Jan, 21),
-    #(2000, days.Feb, 4),
+  test_range(date.Friday, 2, #(2000, date.Jan, 1), #(2000, date.Feb, 18), [
+    #(2000, date.Jan, 7),
+    #(2000, date.Jan, 21),
+    #(2000, date.Feb, 4),
   ])
 
-  test_range(days.Saturday, 2, #(2000, days.Jan, 1), #(2000, days.Feb, 12), [
-    #(2000, days.Jan, 1),
-    #(2000, days.Jan, 15),
-    #(2000, days.Jan, 29),
+  test_range(date.Saturday, 2, #(2000, date.Jan, 1), #(2000, date.Feb, 12), [
+    #(2000, date.Jan, 1),
+    #(2000, date.Jan, 15),
+    #(2000, date.Jan, 29),
   ])
 
-  test_range(days.Sunday, 2, #(2000, days.Jan, 1), #(2000, days.Feb, 13), [
-    #(2000, days.Jan, 2),
-    #(2000, days.Jan, 16),
-    #(2000, days.Jan, 30),
+  test_range(date.Sunday, 2, #(2000, date.Jan, 1), #(2000, date.Feb, 13), [
+    #(2000, date.Jan, 2),
+    #(2000, date.Jan, 16),
+    #(2000, date.Jan, 30),
   ])
 
-  test_range(days.Day, 2, #(2000, days.Jan, 1), #(2000, days.Jan, 7), [
-    #(2000, days.Jan, 1),
-    #(2000, days.Jan, 3),
-    #(2000, days.Jan, 5),
+  test_range(date.Day, 2, #(2000, date.Jan, 1), #(2000, date.Jan, 7), [
+    #(2000, date.Jan, 1),
+    #(2000, date.Jan, 3),
+    #(2000, date.Jan, 5),
   ])
 }
 
@@ -1148,23 +1145,23 @@ pub fn range_returns_list_of_dates_test() {
 //                 ]
 //             ]
 pub fn range_beings_at_interval_nearest_start_date_test() {
-  test_range(days.Day, 10, #(2000, days.Jan, 1), #(2000, days.Jan, 30), [
-    #(2000, days.Jan, 1),
-    #(2000, days.Jan, 11),
-    #(2000, days.Jan, 21),
+  test_range(date.Day, 10, #(2000, date.Jan, 1), #(2000, date.Jan, 30), [
+    #(2000, date.Jan, 1),
+    #(2000, date.Jan, 11),
+    #(2000, date.Jan, 21),
   ])
 
-  test_range(days.Day, 10, #(2000, days.Jan, 1), #(2000, days.Jan, 31), [
-    #(2000, days.Jan, 1),
-    #(2000, days.Jan, 11),
-    #(2000, days.Jan, 21),
+  test_range(date.Day, 10, #(2000, date.Jan, 1), #(2000, date.Jan, 31), [
+    #(2000, date.Jan, 1),
+    #(2000, date.Jan, 11),
+    #(2000, date.Jan, 21),
   ])
 
-  test_range(days.Day, 10, #(2000, days.Jan, 1), #(2000, days.Feb, 1), [
-    #(2000, days.Jan, 1),
-    #(2000, days.Jan, 11),
-    #(2000, days.Jan, 21),
-    #(2000, days.Jan, 31),
+  test_range(date.Day, 10, #(2000, date.Jan, 1), #(2000, date.Feb, 1), [
+    #(2000, date.Jan, 1),
+    #(2000, date.Jan, 11),
+    #(2000, date.Jan, 21),
+    #(2000, date.Jan, 31),
   ])
 }
 
@@ -1173,11 +1170,11 @@ pub fn range_beings_at_interval_nearest_start_date_test() {
 //                 Date.range Day 1 (Date.fromCalendarDate 2000 Jan 1) (Date.fromCalendarDate 2001 Jan 1)
 //                     |> equal (calendarDatesInYear 2000 |> List.map fromCalendarDate)
 pub fn range_returns_a_list_of_days_test() {
-  days.range(
-    days.Day,
+  date.range(
+    date.Day,
     1,
-    days.from_calendar_date(2000, days.Jan, 1),
-    days.from_calendar_date(2001, days.Jan, 1),
+    date.from_calendar_date(2000, date.Jan, 1),
+    date.from_calendar_date(2001, date.Jan, 1),
   )
   |> should.equal(calendar_dates_in_year(2000) |> list.map(from_calendar_date))
 }
@@ -1187,11 +1184,11 @@ pub fn range_returns_a_list_of_days_test() {
 //                 Date.range Day 1 (Date.fromCalendarDate 2000 Jan 1) (Date.fromCalendarDate 2000 Jan 1)
 //                     |> equal []
 pub fn range_can_return_empty_list_test() {
-  days.range(
-    days.Day,
+  date.range(
+    date.Day,
     1,
-    days.from_calendar_date(2000, days.Jan, 1),
-    days.from_calendar_date(2000, days.Jan, 1),
+    date.from_calendar_date(2000, date.Jan, 1),
+    date.from_calendar_date(2000, date.Jan, 1),
   )
   |> should.equal([])
 }
@@ -1212,12 +1209,12 @@ pub fn range_can_return_empty_list_test() {
 //             ]
 //         ]
 pub fn range_can_return_large_list_test() {
-  let start = days.from_calendar_date(1950, days.Jan, 1)
-  let end = days.from_calendar_date(2050, days.Jan, 1)
+  let start = date.from_calendar_date(1950, date.Jan, 1)
+  let end = date.from_calendar_date(2050, date.Jan, 1)
 
-  let expected_length = days.diff(days.Days, start, end)
+  let expected_length = date.diff(date.Days, start, end)
 
-  days.range(days.Day, 1, start, end)
+  date.range(date.Day, 1, start, end)
   |> list.length
   |> should.equal(expected_length)
 }
@@ -1241,19 +1238,19 @@ pub fn range_can_return_large_list_test() {
 //                 , ( "2008061", ( 2008, Mar, 1 ) )
 //                 ]
 fn test_from_iso_string(string: String, tuple) {
-  days.from_iso_string(string)
+  date.from_iso_string(string)
   |> should.equal(Ok(tuple_to_calendar_date(tuple)))
 }
 
 pub fn from_iso_string_handles_basic_format_test() {
   list.each(
     [
-      #("2008", #(2008, days.Jan, 1)),
-      #("200812", #(2008, days.Dec, 1)),
-      #("20081231", #(2008, days.Dec, 31)),
-      #("2009W01", #(2008, days.Dec, 29)),
-      #("2009W014", #(2009, days.Jan, 1)),
-      #("2008061", #(2008, days.Mar, 1)),
+      #("2008", #(2008, date.Jan, 1)),
+      #("200812", #(2008, date.Dec, 1)),
+      #("20081231", #(2008, date.Dec, 31)),
+      #("2009W01", #(2008, date.Dec, 29)),
+      #("2009W014", #(2009, date.Jan, 1)),
+      #("2008061", #(2008, date.Mar, 1)),
     ],
     fn(entry) { test_from_iso_string(entry.0, entry.1) },
   )
@@ -1270,11 +1267,11 @@ pub fn from_iso_string_handles_basic_format_test() {
 pub fn from_iso_string_handles_extended_format_test() {
   list.each(
     [
-      #("2008-12", #(2008, days.Dec, 1)),
-      #("2008-12-31", #(2008, days.Dec, 31)),
-      #("2009-W01", #(2008, days.Dec, 29)),
-      #("2009-W01-4", #(2009, days.Jan, 1)),
-      #("2008-061", #(2008, days.Mar, 1)),
+      #("2008-12", #(2008, date.Dec, 1)),
+      #("2008-12-31", #(2008, date.Dec, 31)),
+      #("2009-W01", #(2008, date.Dec, 29)),
+      #("2009-W01-4", #(2009, date.Jan, 1)),
+      #("2008-061", #(2008, date.Mar, 1)),
     ],
     fn(entry) { test_from_iso_string(entry.0, entry.1) },
   )
@@ -1301,7 +1298,7 @@ pub fn from_iso_string_returns_error_for_malformed_date_strings_test() {
       "2008-12-031", "2008-0061", "2018-05-1", "2018-5", "20180",
     ],
     fn(string) {
-      days.from_iso_string(string) |> result.is_error() |> should.equal(True)
+      date.from_iso_string(string) |> result.is_error() |> should.equal(True)
     },
   )
 }
@@ -1408,7 +1405,7 @@ pub fn from_iso_string_returns_errors_for_invalid_dates_test() {
         "Invalid week date: weekday 8 is out of range (1 to 7); received (year 2008, week 1, weekday 8)",
       ),
     ],
-    fn(tuple) { days.from_iso_string(tuple.0) |> should.equal(Error(tuple.1)) },
+    fn(tuple) { date.from_iso_string(tuple.0) |> should.equal(Error(tuple.1)) },
   )
 }
 
@@ -1426,7 +1423,7 @@ pub fn from_iso_string_errors_for_valid_date_followed_by_t_test() {
       "2018-269T00:00:00.000Z",
     ],
     fn(string) {
-      days.from_iso_string(string)
+      date.from_iso_string(string)
       |> should.equal(Error("Expected a date only, not a date and time"))
     },
   )
@@ -1441,7 +1438,7 @@ pub fn from_iso_string_errors_for_valid_date_followed_by_t_test() {
 //                 ]
 pub fn from_iso_string_errors_for_valid_date_followed_by_anything_else_test() {
   list.each(["2018-09-26 ", "2018-W39-3 ", "2018-269 "], fn(string) {
-    days.from_iso_string(string)
+    date.from_iso_string(string)
     |> should.equal(Error("Expected a date only"))
   })
 }
@@ -1453,7 +1450,7 @@ pub fn from_iso_string_errors_for_valid_date_followed_by_anything_else_test() {
 //                 ]
 pub fn from_iso_string_errors_describing_only_one_parser_dead_end_test() {
   list.each(["2018-"], fn(string) {
-    days.from_iso_string(string)
+    date.from_iso_string(string)
     |> should.equal(Error("Expected a date in ISO 8601 format"))
   })
 }
@@ -1485,8 +1482,8 @@ pub fn from_iso_string_can_form_an_isomorphism_with_to_iso_string_test() {
   |> list.concat
   |> list.each(fn(date) {
     expect_isomorphism(
-      fn(val) { val |> result.map(days.to_iso_string) },
-      fn(val) { val |> result.then(days.from_iso_string) },
+      fn(val) { val |> result.map(date.to_iso_string) },
+      fn(val) { val |> result.then(date.from_iso_string) },
       Ok(from_calendar_date(date)),
     )
   })
@@ -1514,8 +1511,8 @@ pub fn from_iso_string_can_form_an_isomorphism_with_format_yyyy_ddd_test() {
   |> list.concat
   |> list.each(fn(date) {
     expect_isomorphism(
-      fn(val) { val |> result.map(fn(date) { days.format(date, "yyyy-DDD") }) },
-      fn(val) { val |> result.then(days.from_iso_string) },
+      fn(val) { val |> result.map(fn(date) { date.format(date, "yyyy-DDD") }) },
+      fn(val) { val |> result.then(date.from_iso_string) },
       Ok(from_calendar_date(date)),
     )
   })
@@ -1545,9 +1542,9 @@ pub fn from_iso_string_can_form_an_isomorphism_with_format_yyyy_w_www_e_test() {
   |> list.each(fn(date) {
     expect_isomorphism(
       fn(val) {
-        val |> result.map(fn(date) { days.format(date, "YYYY-'W'ww-e") })
+        val |> result.map(fn(date) { date.format(date, "YYYY-'W'ww-e") })
       },
-      fn(val) { val |> result.then(days.from_iso_string) },
+      fn(val) { val |> result.then(date.from_iso_string) },
       Ok(from_calendar_date(date)),
     )
   })
@@ -1573,13 +1570,13 @@ pub fn from_iso_string_can_form_an_isomorphism_with_format_yyyy_w_www_e_test() {
 pub fn from_ordinal_date_test() {
   list.each(
     [
-      #(#(2000, -1), days.OrdinalDate(2000, 1)),
-      #(#(2000, 0), days.OrdinalDate(2000, 1)),
-      #(#(2001, 366), days.OrdinalDate(2001, 365)),
-      #(#(2000, 367), days.OrdinalDate(2000, 366)),
+      #(#(2000, -1), date.OrdinalDate(2000, 1)),
+      #(#(2000, 0), date.OrdinalDate(2000, 1)),
+      #(#(2001, 366), date.OrdinalDate(2001, 365)),
+      #(#(2000, 367), date.OrdinalDate(2000, 366)),
     ],
     fn(tuple) {
-      days.from_ordinal_date({ tuple.0 }.0, { tuple.0 }.1)
+      date.from_ordinal_date({ tuple.0 }.0, { tuple.0 }.1)
       |> to_ordinal_date
       |> should.equal(tuple.1)
     },
@@ -1618,25 +1615,25 @@ pub fn from_ordinal_date_test() {
 pub fn from_calendar_date_test() {
   list.each(
     [
-      #(#(2000, days.Jan, -1), days.CalendarDate(2000, days.Jan, 1)),
-      #(#(2000, days.Jan, 0), days.CalendarDate(2000, days.Jan, 1)),
-      #(#(2000, days.Jan, 32), days.CalendarDate(2000, days.Jan, 31)),
-      #(#(2000, days.Feb, 0), days.CalendarDate(2000, days.Feb, 1)),
-      #(#(2001, days.Feb, 29), days.CalendarDate(2001, days.Feb, 28)),
-      #(#(2000, days.Feb, 30), days.CalendarDate(2000, days.Feb, 29)),
-      #(#(2000, days.Mar, 32), days.CalendarDate(2000, days.Mar, 31)),
-      #(#(2000, days.Apr, 31), days.CalendarDate(2000, days.Apr, 30)),
-      #(#(2000, days.May, 32), days.CalendarDate(2000, days.May, 31)),
-      #(#(2000, days.Jun, 31), days.CalendarDate(2000, days.Jun, 30)),
-      #(#(2000, days.Jul, 32), days.CalendarDate(2000, days.Jul, 31)),
-      #(#(2000, days.Aug, 32), days.CalendarDate(2000, days.Aug, 31)),
-      #(#(2000, days.Sep, 31), days.CalendarDate(2000, days.Sep, 30)),
-      #(#(2000, days.Oct, 32), days.CalendarDate(2000, days.Oct, 31)),
-      #(#(2000, days.Nov, 31), days.CalendarDate(2000, days.Nov, 30)),
-      #(#(2000, days.Dec, 32), days.CalendarDate(2000, days.Dec, 31)),
+      #(#(2000, date.Jan, -1), date.CalendarDate(2000, date.Jan, 1)),
+      #(#(2000, date.Jan, 0), date.CalendarDate(2000, date.Jan, 1)),
+      #(#(2000, date.Jan, 32), date.CalendarDate(2000, date.Jan, 31)),
+      #(#(2000, date.Feb, 0), date.CalendarDate(2000, date.Feb, 1)),
+      #(#(2001, date.Feb, 29), date.CalendarDate(2001, date.Feb, 28)),
+      #(#(2000, date.Feb, 30), date.CalendarDate(2000, date.Feb, 29)),
+      #(#(2000, date.Mar, 32), date.CalendarDate(2000, date.Mar, 31)),
+      #(#(2000, date.Apr, 31), date.CalendarDate(2000, date.Apr, 30)),
+      #(#(2000, date.May, 32), date.CalendarDate(2000, date.May, 31)),
+      #(#(2000, date.Jun, 31), date.CalendarDate(2000, date.Jun, 30)),
+      #(#(2000, date.Jul, 32), date.CalendarDate(2000, date.Jul, 31)),
+      #(#(2000, date.Aug, 32), date.CalendarDate(2000, date.Aug, 31)),
+      #(#(2000, date.Sep, 31), date.CalendarDate(2000, date.Sep, 30)),
+      #(#(2000, date.Oct, 32), date.CalendarDate(2000, date.Oct, 31)),
+      #(#(2000, date.Nov, 31), date.CalendarDate(2000, date.Nov, 30)),
+      #(#(2000, date.Dec, 32), date.CalendarDate(2000, date.Dec, 31)),
     ],
     fn(tuple) {
-      days.from_calendar_date({ tuple.0 }.0, { tuple.0 }.1, { tuple.0 }.2)
+      date.from_calendar_date({ tuple.0 }.0, { tuple.0 }.1, { tuple.0 }.2)
       |> to_calendar_date
       |> should.equal(tuple.1)
     },
@@ -1663,13 +1660,13 @@ pub fn from_calendar_date_test() {
 pub fn from_week_date_test() {
   list.each(
     [
-      #(#(2000, -1, days.Mon), days.WeekDate(2000, 1, days.Mon)),
-      #(#(2000, 0, days.Mon), days.WeekDate(2000, 1, days.Mon)),
-      #(#(2000, 53, days.Mon), days.WeekDate(2000, 52, days.Mon)),
-      #(#(2004, 54, days.Mon), days.WeekDate(2004, 53, days.Mon)),
+      #(#(2000, -1, date.Mon), date.WeekDate(2000, 1, date.Mon)),
+      #(#(2000, 0, date.Mon), date.WeekDate(2000, 1, date.Mon)),
+      #(#(2000, 53, date.Mon), date.WeekDate(2000, 52, date.Mon)),
+      #(#(2004, 54, date.Mon), date.WeekDate(2004, 53, date.Mon)),
     ],
     fn(tuple) {
-      days.from_week_date({ tuple.0 }.0, { tuple.0 }.1, { tuple.0 }.2)
+      date.from_week_date({ tuple.0 }.0, { tuple.0 }.1, { tuple.0 }.2)
       |> to_week_date
       |> should.equal(tuple.1)
     },
@@ -1691,8 +1688,8 @@ pub fn from_week_date_test() {
 //             )
 //         ]
 pub fn number_to_month_test() {
-  list.each([#(-1, days.Jan), #(0, days.Jan), #(13, days.Dec)], fn(tuple) {
-    tuple.0 |> days.number_to_month |> should.equal(tuple.1)
+  list.each([#(-1, date.Jan), #(0, date.Jan), #(13, date.Dec)], fn(tuple) {
+    tuple.0 |> date.number_to_month |> should.equal(tuple.1)
   })
 }
 
@@ -1711,8 +1708,8 @@ pub fn number_to_month_test() {
 //             )
 //         ]
 pub fn number_to_weekday_test() {
-  list.each([#(-1, days.Mon), #(0, days.Mon), #(8, days.Sun)], fn(tuple) {
-    tuple.0 |> days.number_to_weekday |> should.equal(tuple.1)
+  list.each([#(-1, date.Mon), #(0, date.Mon), #(8, date.Sun)], fn(tuple) {
+    tuple.0 |> date.number_to_weekday |> should.equal(tuple.1)
   })
 }
 
@@ -1743,22 +1740,22 @@ pub fn compare_returns_order_test() {
   list.each(
     [
       #(
-        days.from_ordinal_date(1970, 1),
-        days.from_ordinal_date(2038, 1),
+        date.from_ordinal_date(1970, 1),
+        date.from_ordinal_date(2038, 1),
         order.Lt,
       ),
       #(
-        days.from_ordinal_date(1970, 1),
-        days.from_ordinal_date(1970, 1),
+        date.from_ordinal_date(1970, 1),
+        date.from_ordinal_date(1970, 1),
         order.Eq,
       ),
       #(
-        days.from_ordinal_date(2038, 1),
-        days.from_ordinal_date(1970, 1),
+        date.from_ordinal_date(2038, 1),
+        date.from_ordinal_date(1970, 1),
         order.Gt,
       ),
     ],
-    fn(tuple) { days.compare(tuple.0, tuple.1) |> should.equal(tuple.2) },
+    fn(tuple) { date.compare(tuple.0, tuple.1) |> should.equal(tuple.2) },
   )
 }
 
@@ -1782,20 +1779,20 @@ pub fn compare_returns_order_test() {
 pub fn compare_can_be_used_with_list_sort_test() {
   list.sort(
     [
-      days.from_ordinal_date(2038, 1),
-      days.from_ordinal_date(2038, 19),
-      days.from_ordinal_date(1970, 1),
-      days.from_ordinal_date(1969, 201),
-      days.from_ordinal_date(2001, 1),
+      date.from_ordinal_date(2038, 1),
+      date.from_ordinal_date(2038, 19),
+      date.from_ordinal_date(1970, 1),
+      date.from_ordinal_date(1969, 201),
+      date.from_ordinal_date(2001, 1),
     ],
-    days.compare,
+    date.compare,
   )
   |> should.equal([
-    days.from_ordinal_date(1969, 201),
-    days.from_ordinal_date(1970, 1),
-    days.from_ordinal_date(2001, 1),
-    days.from_ordinal_date(2038, 1),
-    days.from_ordinal_date(2038, 19),
+    date.from_ordinal_date(1969, 201),
+    date.from_ordinal_date(1970, 1),
+    date.from_ordinal_date(2001, 1),
+    date.from_ordinal_date(2038, 1),
+    date.from_ordinal_date(2038, 19),
   ])
 }
 
@@ -1826,9 +1823,9 @@ pub fn compare_can_be_used_with_list_sort_test() {
 
 pub fn is_between_with_min_less_than_max_test() {
   let #(a, b, c) = #(
-    days.from_ordinal_date(1969, 201),
-    days.from_ordinal_date(1970, 1),
-    days.from_ordinal_date(2038, 19),
+    date.from_ordinal_date(1969, 201),
+    date.from_ordinal_date(1970, 1),
+    date.from_ordinal_date(2038, 19),
   )
 
   list.each(
@@ -1840,7 +1837,7 @@ pub fn is_between_with_min_less_than_max_test() {
       #("after", #(a, b, c), False),
     ],
     fn(tuple) {
-      days.is_between({ tuple.1 }.2, { tuple.1 }.0, { tuple.1 }.1)
+      date.is_between({ tuple.1 }.2, { tuple.1 }.0, { tuple.1 }.1)
       |> should.equal(tuple.2)
     },
   )
@@ -1854,9 +1851,9 @@ pub fn is_between_with_min_less_than_max_test() {
 //                 ]
 pub fn is_between_with_min_equal_than_max_test() {
   let #(a, b, c) = #(
-    days.from_ordinal_date(1969, 201),
-    days.from_ordinal_date(1970, 1),
-    days.from_ordinal_date(2038, 19),
+    date.from_ordinal_date(1969, 201),
+    date.from_ordinal_date(1970, 1),
+    date.from_ordinal_date(2038, 19),
   )
 
   list.each(
@@ -1866,7 +1863,7 @@ pub fn is_between_with_min_equal_than_max_test() {
       #("after", #(b, b, c), False),
     ],
     fn(tuple) {
-      days.is_between({ tuple.1 }.2, { tuple.1 }.0, { tuple.1 }.1)
+      date.is_between({ tuple.1 }.2, { tuple.1 }.0, { tuple.1 }.1)
       |> should.equal(tuple.2)
     },
   )
@@ -1883,9 +1880,9 @@ pub fn is_between_with_min_equal_than_max_test() {
 //         ]
 pub fn is_between_with_min_greater_than_than_max_test() {
   let #(a, b, c) = #(
-    days.from_ordinal_date(1969, 201),
-    days.from_ordinal_date(1970, 1),
-    days.from_ordinal_date(2038, 19),
+    date.from_ordinal_date(1969, 201),
+    date.from_ordinal_date(1970, 1),
+    date.from_ordinal_date(2038, 19),
   )
 
   list.each(
@@ -1897,7 +1894,7 @@ pub fn is_between_with_min_greater_than_than_max_test() {
       #("after", #(b, a, c), False),
     ],
     fn(tuple) {
-      days.is_between({ tuple.1 }.2, { tuple.1 }.0, { tuple.1 }.1)
+      date.is_between({ tuple.1 }.2, { tuple.1 }.0, { tuple.1 }.1)
       |> should.equal(tuple.2)
     },
   )
@@ -1917,12 +1914,12 @@ pub fn is_between_with_min_greater_than_than_max_test() {
 //         ]
 pub fn min_test() {
   let #(a, b) = #(
-    days.from_ordinal_date(1969, 201),
-    days.from_ordinal_date(1970, 1),
+    date.from_ordinal_date(1969, 201),
+    date.from_ordinal_date(1970, 1),
   )
 
-  days.min(a, b) |> should.equal(a)
-  days.min(b, a) |> should.equal(a)
+  date.min(a, b) |> should.equal(a)
+  date.min(b, a) |> should.equal(a)
 }
 
 // test_max : Test
@@ -1939,12 +1936,12 @@ pub fn min_test() {
 //         ]
 pub fn max_test() {
   let #(a, b) = #(
-    days.from_ordinal_date(1969, 201),
-    days.from_ordinal_date(1970, 1),
+    date.from_ordinal_date(1969, 201),
+    date.from_ordinal_date(1970, 1),
   )
 
-  days.max(a, b) |> should.equal(b)
-  days.max(b, a) |> should.equal(b)
+  date.max(a, b) |> should.equal(b)
+  date.max(b, a) |> should.equal(b)
 }
 
 // test_clamp : Test
@@ -1973,9 +1970,9 @@ pub fn max_test() {
 //                 ]
 pub fn clamp_with_min_less_than_max_test() {
   let #(a, b, c) = #(
-    days.from_ordinal_date(1969, 201),
-    days.from_ordinal_date(1970, 1),
-    days.from_ordinal_date(2038, 19),
+    date.from_ordinal_date(1969, 201),
+    date.from_ordinal_date(1970, 1),
+    date.from_ordinal_date(2038, 19),
   )
 
   list.each(
@@ -1987,7 +1984,7 @@ pub fn clamp_with_min_less_than_max_test() {
       #("after", #(a, b, c), b),
     ],
     fn(tuple) {
-      days.clamp({ tuple.1 }.2, { tuple.1 }.0, { tuple.1 }.1)
+      date.clamp({ tuple.1 }.2, { tuple.1 }.0, { tuple.1 }.1)
       |> should.equal(tuple.2)
     },
   )
@@ -2002,9 +1999,9 @@ pub fn clamp_with_min_less_than_max_test() {
 //         ]
 pub fn clamp_with_min_equals_max_test() {
   let #(a, b, c) = #(
-    days.from_ordinal_date(1969, 201),
-    days.from_ordinal_date(1970, 1),
-    days.from_ordinal_date(2038, 19),
+    date.from_ordinal_date(1969, 201),
+    date.from_ordinal_date(1970, 1),
+    date.from_ordinal_date(2038, 19),
   )
 
   list.each(
@@ -2014,7 +2011,7 @@ pub fn clamp_with_min_equals_max_test() {
       #("after", #(b, b, c), b),
     ],
     fn(tuple) {
-      days.clamp({ tuple.1 }.2, { tuple.1 }.0, { tuple.1 }.1)
+      date.clamp({ tuple.1 }.2, { tuple.1 }.0, { tuple.1 }.1)
       |> should.equal(tuple.2)
     },
   )
@@ -2023,20 +2020,20 @@ pub fn clamp_with_min_equals_max_test() {
 // Additional tests - not part of the original port
 
 pub fn year_test() {
-  days.from_calendar_date(1, days.Jan, 1)
-  |> days.year
+  date.from_calendar_date(1, date.Jan, 1)
+  |> date.year
   |> should.equal(1)
 
-  days.from_calendar_date(2, days.Jan, 1)
-  |> days.year
+  date.from_calendar_date(2, date.Jan, 1)
+  |> date.year
   |> should.equal(2)
 
-  days.from_calendar_date(2020, days.May, 23)
-  |> days.year
+  date.from_calendar_date(2020, date.May, 23)
+  |> date.year
   |> should.equal(2020)
 
-  days.from_calendar_date(-5, days.May, 30)
-  |> days.year
+  date.from_calendar_date(-5, date.May, 30)
+  |> date.year
   |> should.equal(-5)
 }
 
@@ -2051,7 +2048,7 @@ pub fn year_test() {
 //         (date |> Date.year)
 //         (date |> Date.ordinalDay)
 fn to_ordinal_date(date: Date) {
-  days.OrdinalDate(year: days.year(date), ordinal_day: days.ordinal_day(date))
+  date.OrdinalDate(year: date.year(date), ordinal_day: date.ordinal_day(date))
 }
 
 // type alias CalendarDate =
@@ -2060,8 +2057,8 @@ fn to_ordinal_date(date: Date) {
 // fromCalendarDate : CalendarDate -> Date
 // fromCalendarDate { year, month, day } =
 //     Date.fromCalendarDate year month day
-fn from_calendar_date(date: CalendarDate) -> days.Date {
-  days.from_calendar_date(date.year, date.month, date.day)
+fn from_calendar_date(date: CalendarDate) -> date.Date {
+  date.from_calendar_date(date.year, date.month, date.day)
 }
 
 // toCalendarDate : Date -> CalendarDate
@@ -2070,8 +2067,8 @@ fn from_calendar_date(date: CalendarDate) -> days.Date {
 //         (date |> Date.year)
 //         (date |> Date.month)
 //         (date |> Date.day)
-fn to_calendar_date(date: days.Date) -> CalendarDate {
-  CalendarDate(days.year(date), days.month(date), days.day(date))
+fn to_calendar_date(date: date.Date) -> CalendarDate {
+  CalendarDate(date.year(date), date.month(date), date.day(date))
 }
 
 // type alias WeekDate =
@@ -2082,7 +2079,7 @@ fn to_calendar_date(date: days.Date) -> CalendarDate {
 //     Date.fromWeekDate weekYear weekNumber weekday
 fn from_week_date(week_date: WeekDate) -> Date {
   let WeekDate(week_year, week_number, weekday) = week_date
-  days.from_week_date(week_year, week_number, weekday)
+  date.from_week_date(week_year, week_number, weekday)
 }
 
 // toWeekDate : Date -> WeekDate
@@ -2092,10 +2089,10 @@ fn from_week_date(week_date: WeekDate) -> Date {
 //         (date |> Date.weekNumber)
 //         (date |> Date.weekday)
 fn to_week_date(date: Date) -> WeekDate {
-  days.WeekDate(
-    week_year: days.week_year(date),
-    week_number: days.week_number(date),
-    weekday: days.weekday(date),
+  date.WeekDate(
+    week_year: date.week_year(date),
+    week_number: date.week_number(date),
+    weekday: date.weekday(date),
   )
 }
 
@@ -2109,21 +2106,21 @@ fn to_week_date(date: Date) -> WeekDate {
 
 fn calendar_dates_in_year(year: Int) -> List(CalendarDate) {
   [
-    days.Jan,
-    days.Feb,
-    days.Mar,
-    days.Apr,
-    days.May,
-    days.Jun,
-    days.Jul,
-    days.Aug,
-    days.Sep,
-    days.Oct,
-    days.Nov,
-    days.Dec,
+    date.Jan,
+    date.Feb,
+    date.Mar,
+    date.Apr,
+    date.May,
+    date.Jun,
+    date.Jul,
+    date.Aug,
+    date.Sep,
+    date.Oct,
+    date.Nov,
+    date.Dec,
   ]
   |> list.map(fn(month) {
-    list.range(1, days.days_in_month(year, month))
+    list.range(1, date.days_in_month(year, month))
     |> list.map(fn(day) { CalendarDate(year, month, day) })
   })
   |> list.concat
@@ -2206,6 +2203,6 @@ fn expect_idempotence(x_to_x, x) {
   x_to_x(x_to_x(x)) |> should.equal(x_to_x(x))
 }
 
-fn tuple_to_calendar_date(tuple: #(Int, days.Month, Int)) {
-  days.from_calendar_date(tuple.0, tuple.1, tuple.2)
+fn tuple_to_calendar_date(tuple: #(Int, date.Month, Int)) {
+  date.from_calendar_date(tuple.0, tuple.1, tuple.2)
 }

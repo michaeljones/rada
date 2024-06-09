@@ -1,7 +1,7 @@
 import gleam/list
 import gleeunit/should
 
-import days/pattern.{Field, Literal}
+import date/pattern.{Field, Literal}
 
 // test_fromString : Test
 // test_fromString =
