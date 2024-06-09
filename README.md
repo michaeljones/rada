@@ -6,3 +6,5 @@ Temporary name.
 
 This is a port of the [justinmimbs/date](https://package.elm-lang.org/packages/justinmimbs/date/latest) Elm library.
 Done with the kind permission of the author. The API has been adjusted to match norms of the Gleam language in places.
+
+Currently the `fromPosix` and `today` functions have not yet but ported.
