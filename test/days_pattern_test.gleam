@@ -1,6 +1,7 @@
+import gleam/list
 import gleeunit/should
 
-import days/pattern.{Field}
+import days/pattern.{Field, Literal}
 
 // test_fromString : Test
 // test_fromString =
@@ -21,6 +22,34 @@ import days/pattern.{Field}
 //             , ( "'o''clock'", [ l "o'clock" ] )
 //             , ( "'''aaa ' '' - ''' '' '' '..' a '", [ l "'aaa  ' - ' ' ' .. a " ] )
 //             ]
+pub fn from_string_test() {
+  list.each(
+    [
+      #("aaa", [Field("a", 3)]),
+      #("abbccc", [Field("a", 1), Field("b", 2), Field("c", 3)]),
+      #("''dddd''eeeee", [
+        Literal("'"),
+        Field("d", 4),
+        Literal("'"),
+        Field("e", 5),
+      ]),
+      #("aa-bb-cc//#!0.dd", [
+        Field("a", 2),
+        Literal("-"),
+        Field("b", 2),
+        Literal("-"),
+        Field("c", 2),
+        Literal("//#!0."),
+        Field("d", 2),
+      ]),
+      #("a'''bbb'", [Field("a", 1), Literal("'bbb")]),
+      #("a'''bbb", [Field("a", 1), Literal("'bbb")]),
+      #("'o''clock'", [Literal("o'clock")]),
+      #("'''aaa ' '' - ''' '' '' '..' a '", [Literal("'aaa  ' - ' ' ' .. a ")]),
+    ],
+    fn(tuple) { pattern.from_string(tuple.0) |> should.equal(tuple.1) },
+  )
+}
 
 pub fn from_string_1_test() {
   pattern.from_string("aaa")
