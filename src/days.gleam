@@ -2971,7 +2971,7 @@ pub fn month_to_number(month: Month) -> Int {
 // 
 //         _ ->
 //             Dec
-fn number_to_month(month_number: Int) -> Month {
+pub fn number_to_month(month_number: Int) -> Month {
   case int.max(1, month_number) {
     1 -> Jan
     2 -> Feb

@@ -1,6 +1,7 @@
 import gleam/int
 import gleam/io
 import gleam/list
+import gleam/order
 import gleam/result
 import gleam/string
 import gleeunit
@@ -1475,8 +1476,6 @@ pub fn from_iso_string_errors_describing_only_one_parser_dead_end_test() {
 //                     )
 //             )
 pub fn from_iso_string_can_form_an_isomorphism_with_to_iso_string_test() {
-  io.println(string.inspect(to_calendar_date(days.from_rata_die(-2191))))
-
   list.concat([
     list.range(1897, 1905),
     list.range(1997, 2025),
@@ -1509,6 +1508,19 @@ pub fn from_iso_string_can_form_an_isomorphism_with_to_iso_string_test() {
 //                                     (Ok <| fromCalendarDate calendarDate)
 //                     )
 //             )
+pub fn from_iso_string_can_form_an_isomorphism_with_format_yyyy_ddd_test() {
+  list.concat([list.range(1997, 2005), list.range(-5, 5)])
+  |> list.map(calendar_dates_in_year)
+  |> list.concat
+  |> list.each(fn(date) {
+    expect_isomorphism(
+      fn(val) { val |> result.map(fn(date) { days.format(date, "yyyy-DDD") }) },
+      fn(val) { val |> result.then(days.from_iso_string) },
+      Ok(from_calendar_date(date)),
+    )
+  })
+}
+
 //         , describe "can form an isomorphism with `format \"YYYY-'W'ww-e\"`"
 //             (List.concat
 //                 [ List.range 1997 2005
@@ -1526,6 +1538,20 @@ pub fn from_iso_string_can_form_an_isomorphism_with_to_iso_string_test() {
 //                     )
 //             )
 //         ]
+pub fn from_iso_string_can_form_an_isomorphism_with_format_yyyy_w_www_e_test() {
+  list.concat([list.range(1997, 2005), list.range(-5, 5)])
+  |> list.map(calendar_dates_in_year)
+  |> list.concat
+  |> list.each(fn(date) {
+    expect_isomorphism(
+      fn(val) {
+        val |> result.map(fn(date) { days.format(date, "YYYY-'W'ww-e") })
+      },
+      fn(val) { val |> result.then(days.from_iso_string) },
+      Ok(from_calendar_date(date)),
+    )
+  })
+}
 
 // test_fromOrdinalDate : Test
 // test_fromOrdinalDate =
@@ -1544,6 +1570,21 @@ pub fn from_iso_string_can_form_an_isomorphism_with_to_iso_string_test() {
 //                 ]
 //             )
 //         ]
+pub fn from_ordinal_date_test() {
+  list.each(
+    [
+      #(#(2000, -1), days.OrdinalDate(2000, 1)),
+      #(#(2000, 0), days.OrdinalDate(2000, 1)),
+      #(#(2001, 366), days.OrdinalDate(2001, 365)),
+      #(#(2000, 367), days.OrdinalDate(2000, 366)),
+    ],
+    fn(tuple) {
+      days.from_ordinal_date({ tuple.0 }.0, { tuple.0 }.1)
+      |> to_ordinal_date
+      |> should.equal(tuple.1)
+    },
+  )
+}
 
 // test_fromCalendarDate : Test
 // test_fromCalendarDate =
@@ -1574,6 +1615,33 @@ pub fn from_iso_string_can_form_an_isomorphism_with_to_iso_string_test() {
 //                 ]
 //             )
 //         ]
+pub fn from_calendar_date_test() {
+  list.each(
+    [
+      #(#(2000, days.Jan, -1), days.CalendarDate(2000, days.Jan, 1)),
+      #(#(2000, days.Jan, 0), days.CalendarDate(2000, days.Jan, 1)),
+      #(#(2000, days.Jan, 32), days.CalendarDate(2000, days.Jan, 31)),
+      #(#(2000, days.Feb, 0), days.CalendarDate(2000, days.Feb, 1)),
+      #(#(2001, days.Feb, 29), days.CalendarDate(2001, days.Feb, 28)),
+      #(#(2000, days.Feb, 30), days.CalendarDate(2000, days.Feb, 29)),
+      #(#(2000, days.Mar, 32), days.CalendarDate(2000, days.Mar, 31)),
+      #(#(2000, days.Apr, 31), days.CalendarDate(2000, days.Apr, 30)),
+      #(#(2000, days.May, 32), days.CalendarDate(2000, days.May, 31)),
+      #(#(2000, days.Jun, 31), days.CalendarDate(2000, days.Jun, 30)),
+      #(#(2000, days.Jul, 32), days.CalendarDate(2000, days.Jul, 31)),
+      #(#(2000, days.Aug, 32), days.CalendarDate(2000, days.Aug, 31)),
+      #(#(2000, days.Sep, 31), days.CalendarDate(2000, days.Sep, 30)),
+      #(#(2000, days.Oct, 32), days.CalendarDate(2000, days.Oct, 31)),
+      #(#(2000, days.Nov, 31), days.CalendarDate(2000, days.Nov, 30)),
+      #(#(2000, days.Dec, 32), days.CalendarDate(2000, days.Dec, 31)),
+    ],
+    fn(tuple) {
+      days.from_calendar_date({ tuple.0 }.0, { tuple.0 }.1, { tuple.0 }.2)
+      |> to_calendar_date
+      |> should.equal(tuple.1)
+    },
+  )
+}
 
 // test_fromWeekDate : Test
 // test_fromWeekDate =
@@ -1592,6 +1660,21 @@ pub fn from_iso_string_can_form_an_isomorphism_with_to_iso_string_test() {
 //                 ]
 //             )
 //         ]
+pub fn from_week_date_test() {
+  list.each(
+    [
+      #(#(2000, -1, days.Mon), days.WeekDate(2000, 1, days.Mon)),
+      #(#(2000, 0, days.Mon), days.WeekDate(2000, 1, days.Mon)),
+      #(#(2000, 53, days.Mon), days.WeekDate(2000, 52, days.Mon)),
+      #(#(2004, 54, days.Mon), days.WeekDate(2004, 53, days.Mon)),
+    ],
+    fn(tuple) {
+      days.from_week_date({ tuple.0 }.0, { tuple.0 }.1, { tuple.0 }.2)
+      |> to_week_date
+      |> should.equal(tuple.1)
+    },
+  )
+}
 
 // test_numberToMonth : Test
 // test_numberToMonth =
@@ -1607,6 +1690,11 @@ pub fn from_iso_string_can_form_an_isomorphism_with_to_iso_string_test() {
 //                 ]
 //             )
 //         ]
+pub fn number_to_month_test() {
+  list.each([#(-1, days.Jan), #(0, days.Jan), #(13, days.Dec)], fn(tuple) {
+    tuple.0 |> days.number_to_month |> should.equal(tuple.1)
+  })
+}
 
 // test_numberToWeekday : Test
 // test_numberToWeekday =
@@ -1622,6 +1710,11 @@ pub fn from_iso_string_can_form_an_isomorphism_with_to_iso_string_test() {
 //                 ]
 //             )
 //         ]
+pub fn number_to_weekday_test() {
+  list.each([#(-1, days.Mon), #(0, days.Mon), #(8, days.Sun)], fn(tuple) {
+    tuple.0 |> days.number_to_weekday |> should.equal(tuple.1)
+  })
+}
 
 // {-
 //    test_is53WeekYear : Test
@@ -1646,6 +1739,29 @@ pub fn from_iso_string_can_form_an_isomorphism_with_to_iso_string_test() {
 //                 , ( Date.fromOrdinalDate 1970 1, Date.fromOrdinalDate 1970 1, EQ )
 //                 , ( Date.fromOrdinalDate 2038 1, Date.fromOrdinalDate 1970 1, GT )
 //                 ]
+pub fn compare_returns_order_test() {
+  list.each(
+    [
+      #(
+        days.from_ordinal_date(1970, 1),
+        days.from_ordinal_date(2038, 1),
+        order.Lt,
+      ),
+      #(
+        days.from_ordinal_date(1970, 1),
+        days.from_ordinal_date(1970, 1),
+        order.Eq,
+      ),
+      #(
+        days.from_ordinal_date(2038, 1),
+        days.from_ordinal_date(1970, 1),
+        order.Gt,
+      ),
+    ],
+    fn(tuple) { days.compare(tuple.0, tuple.1) |> should.equal(tuple.2) },
+  )
+}
+
 //         , test "can be used with List.sortWith" <|
 //             \() ->
 //                 [ Date.fromOrdinalDate 2038 1
@@ -1663,6 +1779,25 @@ pub fn from_iso_string_can_form_an_isomorphism_with_to_iso_string_test() {
 //                         , Date.fromOrdinalDate 2038 19
 //                         ]
 //         ]
+pub fn compare_can_be_used_with_list_sort_test() {
+  list.sort(
+    [
+      days.from_ordinal_date(2038, 1),
+      days.from_ordinal_date(2038, 19),
+      days.from_ordinal_date(1970, 1),
+      days.from_ordinal_date(1969, 201),
+      days.from_ordinal_date(2001, 1),
+    ],
+    days.compare,
+  )
+  |> should.equal([
+    days.from_ordinal_date(1969, 201),
+    days.from_ordinal_date(1970, 1),
+    days.from_ordinal_date(2001, 1),
+    days.from_ordinal_date(2038, 1),
+    days.from_ordinal_date(2038, 19),
+  ])
+}
 
 // test_isBetween : Test
 // test_isBetween =
@@ -1688,12 +1823,55 @@ pub fn from_iso_string_can_form_an_isomorphism_with_to_iso_string_test() {
 //                 , ( "max", ( a, b, b ), True )
 //                 , ( "after", ( a, b, c ), False )
 //                 ]
+
+pub fn is_between_with_min_less_than_max_test() {
+  let #(a, b, c) = #(
+    days.from_ordinal_date(1969, 201),
+    days.from_ordinal_date(1970, 1),
+    days.from_ordinal_date(2038, 19),
+  )
+
+  list.each(
+    [
+      #("before", #(b, c, a), False),
+      #("min", #(b, c, b), True),
+      #("middle", #(a, c, b), True),
+      #("max", #(a, b, b), True),
+      #("after", #(a, b, c), False),
+    ],
+    fn(tuple) {
+      days.is_between({ tuple.1 }.2, { tuple.1 }.0, { tuple.1 }.1)
+      |> should.equal(tuple.2)
+    },
+  )
+}
+
 //         , describe "when min == max, works as expected" <|
 //             List.map toTest
 //                 [ ( "before", ( b, b, a ), False )
 //                 , ( "equal", ( b, b, b ), True )
 //                 , ( "after", ( b, b, c ), False )
 //                 ]
+pub fn is_between_with_min_equal_than_max_test() {
+  let #(a, b, c) = #(
+    days.from_ordinal_date(1969, 201),
+    days.from_ordinal_date(1970, 1),
+    days.from_ordinal_date(2038, 19),
+  )
+
+  list.each(
+    [
+      #("before", #(b, b, a), False),
+      #("equal", #(b, b, b), True),
+      #("after", #(b, b, c), False),
+    ],
+    fn(tuple) {
+      days.is_between({ tuple.1 }.2, { tuple.1 }.0, { tuple.1 }.1)
+      |> should.equal(tuple.2)
+    },
+  )
+}
+
 //         , describe "when min > max, always returns False" <|
 //             List.map toTest
 //                 [ ( "before", ( c, b, a ), False )
@@ -1703,6 +1881,27 @@ pub fn from_iso_string_can_form_an_isomorphism_with_to_iso_string_test() {
 //                 , ( "after", ( b, a, c ), False )
 //                 ]
 //         ]
+pub fn is_between_with_min_greater_than_than_max_test() {
+  let #(a, b, c) = #(
+    days.from_ordinal_date(1969, 201),
+    days.from_ordinal_date(1970, 1),
+    days.from_ordinal_date(2038, 19),
+  )
+
+  list.each(
+    [
+      #("before", #(c, b, a), False),
+      #("min", #(c, b, b), False),
+      #("middle", #(c, a, b), False),
+      #("max", #(b, a, b), False),
+      #("after", #(b, a, c), False),
+    ],
+    fn(tuple) {
+      days.is_between({ tuple.1 }.2, { tuple.1 }.0, { tuple.1 }.1)
+      |> should.equal(tuple.2)
+    },
+  )
+}
 
 // test_min : Test
 // test_min =
@@ -1716,6 +1915,15 @@ pub fn from_iso_string_can_form_an_isomorphism_with_to_iso_string_test() {
 //         [ test "a b" <| \() -> Date.min a b |> equal a
 //         , test "b a" <| \() -> Date.min b a |> equal a
 //         ]
+pub fn min_test() {
+  let #(a, b) = #(
+    days.from_ordinal_date(1969, 201),
+    days.from_ordinal_date(1970, 1),
+  )
+
+  days.min(a, b) |> should.equal(a)
+  days.min(b, a) |> should.equal(a)
+}
 
 // test_max : Test
 // test_max =
@@ -1729,6 +1937,15 @@ pub fn from_iso_string_can_form_an_isomorphism_with_to_iso_string_test() {
 //         [ test "a b" <| \() -> Date.max a b |> equal b
 //         , test "b a" <| \() -> Date.max b a |> equal b
 //         ]
+pub fn max_test() {
+  let #(a, b) = #(
+    days.from_ordinal_date(1969, 201),
+    days.from_ordinal_date(1970, 1),
+  )
+
+  days.max(a, b) |> should.equal(b)
+  days.max(b, a) |> should.equal(b)
+}
 
 // test_clamp : Test
 // test_clamp =
@@ -1754,6 +1971,28 @@ pub fn from_iso_string_can_form_an_isomorphism_with_to_iso_string_test() {
 //                 , ( "max", ( a, b, b ), b )
 //                 , ( "after", ( a, b, c ), b )
 //                 ]
+pub fn clamp_with_min_less_than_max_test() {
+  let #(a, b, c) = #(
+    days.from_ordinal_date(1969, 201),
+    days.from_ordinal_date(1970, 1),
+    days.from_ordinal_date(2038, 19),
+  )
+
+  list.each(
+    [
+      #("before", #(b, c, a), b),
+      #("min", #(b, c, b), b),
+      #("middle", #(a, c, b), b),
+      #("max", #(a, b, b), b),
+      #("after", #(a, b, c), b),
+    ],
+    fn(tuple) {
+      days.clamp({ tuple.1 }.2, { tuple.1 }.0, { tuple.1 }.1)
+      |> should.equal(tuple.2)
+    },
+  )
+}
+
 //         , describe "when min == max, works as expected" <|
 //             List.map toTest
 //                 [ ( "before", ( b, b, a ), b )
@@ -1761,6 +2000,25 @@ pub fn from_iso_string_can_form_an_isomorphism_with_to_iso_string_test() {
 //                 , ( "after", ( b, b, c ), b )
 //                 ]
 //         ]
+pub fn clamp_with_min_equals_max_test() {
+  let #(a, b, c) = #(
+    days.from_ordinal_date(1969, 201),
+    days.from_ordinal_date(1970, 1),
+    days.from_ordinal_date(2038, 19),
+  )
+
+  list.each(
+    [
+      #("before", #(b, b, a), b),
+      #("equal", #(b, b, b), b),
+      #("after", #(b, b, c), b),
+    ],
+    fn(tuple) {
+      days.clamp({ tuple.1 }.2, { tuple.1 }.0, { tuple.1 }.1)
+      |> should.equal(tuple.2)
+    },
+  )
+}
 
 // Additional tests - not part of the original port
 
@@ -1792,6 +2050,9 @@ pub fn year_test() {
 //     OrdinalDate
 //         (date |> Date.year)
 //         (date |> Date.ordinalDay)
+fn to_ordinal_date(date: Date) {
+  days.OrdinalDate(year: days.year(date), ordinal_day: days.ordinal_day(date))
+}
 
 // type alias CalendarDate =
 //     { year : Int, month : Month, day : Int }
