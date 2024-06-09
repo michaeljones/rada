@@ -138,15 +138,15 @@ pub fn from_string(str: String) -> Pattern {
 
   let tokens_result = lexer.run(str, l)
 
-  io.println("Lexer tokens: " <> string.inspect(tokens_result))
+  // io.println("Lexer tokens: " <> string.inspect(tokens_result))
 
   case tokens_result {
     Ok(tokens) -> {
       nibble.run(tokens, parser([]))
       |> result.unwrap([Literal(str)])
     }
-    Error(error) -> {
-      io.println("Error: " <> string.inspect(error))
+    Error(_) -> {
+      // io.println("Error: " <> string.inspect(error))
       []
     }
   }

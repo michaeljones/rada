@@ -3,13 +3,14 @@ import gleam/float
 import gleam/int
 import gleam/io
 import gleam/list
+import gleam/option.{None, Some}
 import gleam/order.{type Order}
 import gleam/result
 import gleam/string
 import nibble
 import nibble/lexer as nibble_lexer
 
-import days/parse.{Dash, Digit, WeekToken} as days_parse
+import days/parse.{Dash, Digit, TimeToken, WeekToken} as days_parse
 import days/pattern.{type Token, Field, Literal}
 
 // module Date exposing
@@ -389,7 +390,7 @@ fn first_of_month(year: Int, month: Month) -> Date {
 pub fn from_ordinal_date(year: Int, ordinal: Int) -> Date {
   let days_in_year = case is_leap_year(year) {
     True -> 366
-    False -> 355
+    False -> 365
   }
 
   RD(days_before_year(year) + int.clamp(ordinal, 1, days_in_year))
@@ -489,7 +490,7 @@ pub fn from_week_date(
 pub fn from_ordinal_parts(year: Int, ordinal: Int) -> Result(Date, String) {
   let days_in_year = case is_leap_year(year) {
     True -> 366
-    False -> 355
+    False -> 365
   }
 
   case !is_between_int(ordinal, 1, days_in_year) {
@@ -1408,8 +1409,6 @@ pub fn format_with_language(
     |> pattern.from_string
     |> list.reverse
 
-  io.println(string.inspect(pattern_text))
-  io.println(string.inspect(tokens))
   format_with_tokens(language, tokens, date)
 }
 
@@ -1673,7 +1672,7 @@ pub fn format(date: Date, pattern: String) -> String {
 // toIsoString : Date -> String
 // toIsoString =
 //     format "yyyy-MM-dd"
-pub fn to_iso_format(date: Date) -> String {
+pub fn to_iso_string(date: Date) -> String {
   format(date, "yyyy-MM-dd")
 }
 
@@ -1731,18 +1730,30 @@ pub fn to_iso_format(date: Date) -> String {
 //         >> Result.mapError (List.head >> Maybe.map deadEndToString >> Maybe.withDefault "")
 pub fn from_iso_string(str: String) -> Result(Date, String) {
   let assert Ok(tokens) = nibble_lexer.run(str, days_parse.lexer())
-  io.println(string.inspect(tokens))
-  case nibble.run(tokens, parser()) {
+
+  let result =
+    nibble.run(
+      tokens,
+      parser()
+        |> nibble.then(fn(val) {
+          nibble.one_of([
+            nibble.eof() |> nibble.then(fn(_) { nibble.succeed(val) }),
+            nibble.token(TimeToken)
+              |> nibble.then(fn(_) {
+                nibble.succeed(Error(
+                  "Expected a date only, not a date and time",
+                ))
+              }),
+            nibble.succeed(Error("Expected a date only")),
+          ])
+        }),
+    )
+
+  case result {
     Ok(Ok(value)) -> Ok(value)
     Ok(Error(err)) -> Error(err)
-    Error(err) -> Error(string.inspect(err))
+    Error(_) -> Error("Expected a date in ISO 8601 format")
   }
-  // |> result.then(fn(result) {
-  //   case result {
-  //     Ok(val) -> nibble.succeed(val)
-  // Error(err) -> nibble.fail(err)
-  // }
-  // })
 }
 
 // 
@@ -1899,7 +1910,7 @@ fn parse_day_of_year() {
     nibble.backtrackable(parse_month_and_day(False)),
     parse_ordinal_day(),
     parse_week_and_weekday(False),
-    nibble.eof() |> nibble.then(fn(_) { nibble.succeed(OrdinalDay(1)) }),
+    nibble.succeed(OrdinalDay(1)),
   ])
 }
 
@@ -1910,25 +1921,24 @@ fn parse_month_and_day(extended: Bool) {
 
   use day <- nibble.do(
     nibble.one_of([
+      // Either parse a two digit day
       nibble.take_exactly(nibble.token(Dash), dash_count)
-        |> nibble.then(fn(_) { int_2() })
-        |> nibble.then(fn(str) {
-          nibble.eof() |> nibble.then(fn(_) { nibble.succeed(str) })
-        }),
+        |> nibble.then(fn(_) { int_2() }),
+      // Or if it is the end of string then it is a just a year
+      // and a month and so we infer '1' as the day
       nibble.eof() |> nibble.then(fn(_) { nibble.succeed(1) }),
     ]),
   )
 
-  io.println("month and day " <> string.inspect(MonthAndDay(month, day)))
+  // io.println("month and day " <> string.inspect(MonthAndDay(month, day)))
 
   nibble.return(MonthAndDay(month, day))
 }
 
 fn parse_ordinal_day() {
   use day <- nibble.do(int_3())
-  use _ <- nibble.do(nibble.eof())
 
-  io.println("ordinal day " <> string.inspect(day))
+  // io.println("ordinal day " <> string.inspect(day))
 
   nibble.return(OrdinalDay(day))
 }
@@ -1944,11 +1954,11 @@ fn parse_week_and_weekday(extended: Bool) {
     nibble.one_of([
       nibble.take_exactly(nibble.token(Dash), dash_count)
         |> nibble.then(fn(_) { int_1() }),
-      nibble.eof() |> nibble.then(fn(_) { nibble.succeed(1) }),
+      nibble.succeed(1),
     ]),
   )
 
-  io.println("week and weekday " <> string.inspect(WeekAndWeekday(week, day)))
+  // io.println("week and weekday " <> string.inspect(WeekAndWeekday(week, day)))
 
   nibble.return(WeekAndWeekday(week, day))
 }
@@ -1978,6 +1988,9 @@ fn parse_digit() {
 //         |> Parser.mapChompedString
 //             (\str _ -> String.toInt str |> Maybe.withDefault 0)
 fn int_4() {
+  use negative <- nibble.do(nibble.optional(nibble.token(Dash)))
+  let negative = negative |> option.map(fn(_) { "-" }) |> option.unwrap("")
+
   use tokens <- nibble.do(
     parse_digit()
     |> nibble.take_exactly(4),
@@ -1990,7 +2003,7 @@ fn int_4() {
     })
     |> string.concat
 
-  let assert Ok(int) = int.parse(str)
+  let assert Ok(int) = int.parse(negative <> str)
 
   nibble.return(int)
 }

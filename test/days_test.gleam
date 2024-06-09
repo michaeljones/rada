@@ -1240,7 +1240,6 @@ pub fn range_can_return_large_list_test() {
 //                 , ( "2008061", ( 2008, Mar, 1 ) )
 //                 ]
 fn test_from_iso_string(string: String, tuple) {
-  io.println("Parsing " <> string)
   days.from_iso_string(string)
   |> should.equal(Ok(tuple_to_calendar_date(tuple)))
 }
@@ -1301,8 +1300,6 @@ pub fn from_iso_string_returns_error_for_malformed_date_strings_test() {
       "2008-12-031", "2008-0061", "2018-05-1", "2018-5", "20180",
     ],
     fn(string) {
-      io.println(string)
-      io.println(string.inspect(days.from_iso_string(string)))
       days.from_iso_string(string) |> result.is_error() |> should.equal(True)
     },
   )
@@ -1337,6 +1334,83 @@ pub fn from_iso_string_returns_error_for_malformed_date_strings_test() {
 //                 , ( "2008-W01-0", "Invalid week date: weekday 0 is out of range (1 to 7); received (year 2008, week 1, weekday 0)" )
 //                 , ( "2008-W01-8", "Invalid week date: weekday 8 is out of range (1 to 7); received (year 2008, week 1, weekday 8)" )
 //                 ]
+pub fn from_iso_string_returns_errors_for_invalid_dates_test() {
+  list.each(
+    // ordinal-day
+    [
+      #(
+        "2007-000",
+        "Invalid ordinal date: ordinal-day 0 is out of range (1 to 365) for 2007; received (year 2007, ordinal-day 0)",
+      ),
+      #(
+        "2007-366",
+        "Invalid ordinal date: ordinal-day 366 is out of range (1 to 365) for 2007; received (year 2007, ordinal-day 366)",
+      ),
+      #(
+        "2008-367",
+        "Invalid ordinal date: ordinal-day 367 is out of range (1 to 366) for 2008; received (year 2008, ordinal-day 367)",
+      ),
+      // month
+      #(
+        "2008-00",
+        "Invalid date: month 0 is out of range (1 to 12); received (year 2008, month 0, day 1)",
+      ),
+      #(
+        "2008-13",
+        "Invalid date: month 13 is out of range (1 to 12); received (year 2008, month 13, day 1)",
+      ),
+      #(
+        "2008-00-01",
+        "Invalid date: month 0 is out of range (1 to 12); received (year 2008, month 0, day 1)",
+      ),
+      #(
+        "2008-13-01",
+        "Invalid date: month 13 is out of range (1 to 12); received (year 2008, month 13, day 1)",
+      ),
+      // day
+      #(
+        "2008-01-00",
+        "Invalid date: day 0 is out of range (1 to 31) for January; received (year 2008, month 1, day 0)",
+      ),
+      #(
+        "2008-01-32",
+        "Invalid date: day 32 is out of range (1 to 31) for January; received (year 2008, month 1, day 32)",
+      ),
+      #(
+        "2006-02-29",
+        "Invalid date: day 29 is out of range (1 to 28) for February (2006 is not a leap year); received (year 2006, month 2, day 29)",
+      ),
+      #(
+        "2008-02-30",
+        "Invalid date: day 30 is out of range (1 to 29) for February; received (year 2008, month 2, day 30)",
+      ),
+      // week
+      #(
+        "2008-W00-1",
+        "Invalid week date: week 0 is out of range (1 to 52) for 2008; received (year 2008, week 0, weekday 1)",
+      ),
+      #(
+        "2008-W53-1",
+        "Invalid week date: week 53 is out of range (1 to 52) for 2008; received (year 2008, week 53, weekday 1)",
+      ),
+      #(
+        "2009-W54-1",
+        "Invalid week date: week 54 is out of range (1 to 53) for 2009; received (year 2009, week 54, weekday 1)",
+      ),
+      // weekday
+      #(
+        "2008-W01-0",
+        "Invalid week date: weekday 0 is out of range (1 to 7); received (year 2008, week 1, weekday 0)",
+      ),
+      #(
+        "2008-W01-8",
+        "Invalid week date: weekday 8 is out of range (1 to 7); received (year 2008, week 1, weekday 8)",
+      ),
+    ],
+    fn(tuple) { days.from_iso_string(tuple.0) |> should.equal(Error(tuple.1)) },
+  )
+}
+
 //         , describe "returns Err for a valid date followed by a 'T'" <|
 //             List.map
 //                 (\s -> test s <| \() -> Date.fromIsoString s |> equal (Err "Expected a date only, not a date and time"))
@@ -1344,6 +1418,19 @@ pub fn from_iso_string_returns_error_for_malformed_date_strings_test() {
 //                 , "2018-W39-3T00:00:00.000Z"
 //                 , "2018-269T00:00:00.000Z"
 //                 ]
+pub fn from_iso_string_errors_for_valid_date_followed_by_t_test() {
+  list.each(
+    [
+      "2018-09-26T00:00:00.000Z", "2018-W39-3T00:00:00.000Z",
+      "2018-269T00:00:00.000Z",
+    ],
+    fn(string) {
+      days.from_iso_string(string)
+      |> should.equal(Error("Expected a date only, not a date and time"))
+    },
+  )
+}
+
 //         , describe "returns Err for a valid date followed by anything else" <|
 //             List.map
 //                 (\s -> test s <| \() -> Date.fromIsoString s |> equal (Err "Expected a date only"))
@@ -1351,11 +1438,25 @@ pub fn from_iso_string_returns_error_for_malformed_date_strings_test() {
 //                 , "2018-W39-3 "
 //                 , "2018-269 "
 //                 ]
+pub fn from_iso_string_errors_for_valid_date_followed_by_anything_else_test() {
+  list.each(["2018-09-26 ", "2018-W39-3 ", "2018-269 "], fn(string) {
+    days.from_iso_string(string)
+    |> should.equal(Error("Expected a date only"))
+  })
+}
+
 //         , describe "returns error messages describing only one parser dead end" <|
 //             List.map
 //                 (\s -> test s <| \() -> Date.fromIsoString s |> equal (Err "Expected a date in ISO 8601 format"))
 //                 [ "2018-"
 //                 ]
+pub fn from_iso_string_errors_describing_only_one_parser_dead_end_test() {
+  list.each(["2018-"], fn(string) {
+    days.from_iso_string(string)
+    |> should.equal(Error("Expected a date in ISO 8601 format"))
+  })
+}
+
 //         , describe "can form an isomorphism with toIsoString"
 //             (List.concat
 //                 [ List.range 1897 1905
@@ -1373,6 +1474,25 @@ pub fn from_iso_string_returns_error_for_malformed_date_strings_test() {
 //                                     (Ok <| fromCalendarDate calendarDate)
 //                     )
 //             )
+pub fn from_iso_string_can_form_an_isomorphism_with_to_iso_string_test() {
+  io.println(string.inspect(to_calendar_date(days.from_rata_die(-2191))))
+
+  list.concat([
+    list.range(1897, 1905),
+    list.range(1997, 2025),
+    list.range(-5, 5),
+  ])
+  |> list.map(calendar_dates_in_year)
+  |> list.concat
+  |> list.each(fn(date) {
+    expect_isomorphism(
+      fn(val) { val |> result.map(days.to_iso_string) },
+      fn(val) { val |> result.then(days.from_iso_string) },
+      Ok(from_calendar_date(date)),
+    )
+  })
+}
+
 //         , describe "can form an isomorphism with `format \"yyyy-DDD\"`"
 //             (List.concat
 //                 [ List.range 1997 2005

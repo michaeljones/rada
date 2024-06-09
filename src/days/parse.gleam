@@ -5,6 +5,8 @@ pub type ParseDateToken {
   Digit(String)
   WeekToken
   Dash
+  TimeToken
+  Other(String)
 }
 
 pub fn lexer() {
@@ -17,11 +19,12 @@ pub fn lexer() {
       case lexeme {
         "" -> nl.Drop(mode)
         "W" -> nl.Keep(WeekToken, mode)
+        "T" -> nl.Keep(TimeToken, mode)
         "-" -> nl.Keep(Dash, mode)
         _ -> {
           case is_digits(lexeme) {
             True -> nl.Keep(Digit(lexeme), mode)
-            False -> nl.NoMatch
+            False -> nl.Keep(Other(lexeme), mode)
           }
         }
       }
