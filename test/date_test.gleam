@@ -19,6 +19,12 @@ pub fn leap_year_test() {
   |> should.equal(False)
 }
 
+// // Commented out as today changes :)
+// pub fn today_test() {
+//   date.today()
+//   |> should.equal(date.from_calendar_date(2024, date.Jun, 10))
+// }
+
 // module Tests exposing (suite)
 
 // import Date exposing (Date, Interval(..), Unit(..))

@@ -2587,6 +2587,16 @@ fn range_help(
 // today : Task x Date
 // today =
 //     Task.map2 fromPosix Time.here Time.now
+pub fn today() -> Date {
+  let #(year, month_number, day) = get_year_month_day()
+
+  from_calendar_date(year, number_to_month(month_number), day)
+}
+
+@external(erlang, "date_ffi", "get_year_month_day")
+@external(javascript, "./date_ffi.mjs", "get_year_month_day")
+fn get_year_month_day() -> #(Int, Int, Int)
+
 // 
 // 
 // 
