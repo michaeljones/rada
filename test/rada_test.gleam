@@ -5,9 +5,8 @@ import gleeunit
 import gleeunit/should
 
 import french_language.{language_fr}
-import rada/date.{
-  type CalendarDate, type Date, type WeekDate, CalendarDate, WeekDate,
-}
+import rada/date.{type Date}
+import rada/testing as t
 
 pub fn main() {
   gleeunit.main()
@@ -184,22 +183,22 @@ pub fn week_date_isomorphic_test() {
 
 pub fn week_date_sample_test() {
   [
-    #(CalendarDate(2005, date.Jan, 1), WeekDate(2004, 53, date.Sat)),
-    #(CalendarDate(2005, date.Jan, 2), WeekDate(2004, 53, date.Sun)),
-    #(CalendarDate(2005, date.Dec, 31), WeekDate(2005, 52, date.Sat)),
-    #(CalendarDate(2007, date.Jan, 1), WeekDate(2007, 1, date.Mon)),
-    #(CalendarDate(2007, date.Dec, 30), WeekDate(2007, 52, date.Sun)),
-    #(CalendarDate(2007, date.Dec, 31), WeekDate(2008, 1, date.Mon)),
-    #(CalendarDate(2008, date.Jan, 1), WeekDate(2008, 1, date.Tue)),
-    #(CalendarDate(2008, date.Dec, 28), WeekDate(2008, 52, date.Sun)),
-    #(CalendarDate(2008, date.Dec, 29), WeekDate(2009, 1, date.Mon)),
-    #(CalendarDate(2008, date.Dec, 30), WeekDate(2009, 1, date.Tue)),
-    #(CalendarDate(2008, date.Dec, 31), WeekDate(2009, 1, date.Wed)),
-    #(CalendarDate(2009, date.Jan, 1), WeekDate(2009, 1, date.Thu)),
-    #(CalendarDate(2009, date.Dec, 31), WeekDate(2009, 53, date.Thu)),
-    #(CalendarDate(2010, date.Jan, 1), WeekDate(2009, 53, date.Fri)),
-    #(CalendarDate(2010, date.Jan, 2), WeekDate(2009, 53, date.Sat)),
-    #(CalendarDate(2010, date.Jan, 3), WeekDate(2009, 53, date.Sun)),
+    #(t.CalendarDate(2005, date.Jan, 1), t.WeekDate(2004, 53, date.Sat)),
+    #(t.CalendarDate(2005, date.Jan, 2), t.WeekDate(2004, 53, date.Sun)),
+    #(t.CalendarDate(2005, date.Dec, 31), t.WeekDate(2005, 52, date.Sat)),
+    #(t.CalendarDate(2007, date.Jan, 1), t.WeekDate(2007, 1, date.Mon)),
+    #(t.CalendarDate(2007, date.Dec, 30), t.WeekDate(2007, 52, date.Sun)),
+    #(t.CalendarDate(2007, date.Dec, 31), t.WeekDate(2008, 1, date.Mon)),
+    #(t.CalendarDate(2008, date.Jan, 1), t.WeekDate(2008, 1, date.Tue)),
+    #(t.CalendarDate(2008, date.Dec, 28), t.WeekDate(2008, 52, date.Sun)),
+    #(t.CalendarDate(2008, date.Dec, 29), t.WeekDate(2009, 1, date.Mon)),
+    #(t.CalendarDate(2008, date.Dec, 30), t.WeekDate(2009, 1, date.Tue)),
+    #(t.CalendarDate(2008, date.Dec, 31), t.WeekDate(2009, 1, date.Wed)),
+    #(t.CalendarDate(2009, date.Jan, 1), t.WeekDate(2009, 1, date.Thu)),
+    #(t.CalendarDate(2009, date.Dec, 31), t.WeekDate(2009, 53, date.Thu)),
+    #(t.CalendarDate(2010, date.Jan, 1), t.WeekDate(2009, 53, date.Fri)),
+    #(t.CalendarDate(2010, date.Jan, 2), t.WeekDate(2009, 53, date.Sat)),
+    #(t.CalendarDate(2010, date.Jan, 3), t.WeekDate(2009, 53, date.Sun)),
   ]
   |> list.map(fn(tuple) {
     let #(calendar_date, week_date) = tuple
@@ -1578,10 +1577,10 @@ pub fn from_iso_string_can_form_an_isomorphism_with_format_yyyy_w_www_e_test() {
 pub fn from_ordinal_date_test() {
   list.each(
     [
-      #(#(2000, -1), date.OrdinalDate(2000, 1)),
-      #(#(2000, 0), date.OrdinalDate(2000, 1)),
-      #(#(2001, 366), date.OrdinalDate(2001, 365)),
-      #(#(2000, 367), date.OrdinalDate(2000, 366)),
+      #(#(2000, -1), t.OrdinalDate(2000, 1)),
+      #(#(2000, 0), t.OrdinalDate(2000, 1)),
+      #(#(2001, 366), t.OrdinalDate(2001, 365)),
+      #(#(2000, 367), t.OrdinalDate(2000, 366)),
     ],
     fn(tuple) {
       date.from_ordinal_date({ tuple.0 }.0, { tuple.0 }.1)
@@ -1623,22 +1622,22 @@ pub fn from_ordinal_date_test() {
 pub fn from_calendar_date_test() {
   list.each(
     [
-      #(#(2000, date.Jan, -1), date.CalendarDate(2000, date.Jan, 1)),
-      #(#(2000, date.Jan, 0), date.CalendarDate(2000, date.Jan, 1)),
-      #(#(2000, date.Jan, 32), date.CalendarDate(2000, date.Jan, 31)),
-      #(#(2000, date.Feb, 0), date.CalendarDate(2000, date.Feb, 1)),
-      #(#(2001, date.Feb, 29), date.CalendarDate(2001, date.Feb, 28)),
-      #(#(2000, date.Feb, 30), date.CalendarDate(2000, date.Feb, 29)),
-      #(#(2000, date.Mar, 32), date.CalendarDate(2000, date.Mar, 31)),
-      #(#(2000, date.Apr, 31), date.CalendarDate(2000, date.Apr, 30)),
-      #(#(2000, date.May, 32), date.CalendarDate(2000, date.May, 31)),
-      #(#(2000, date.Jun, 31), date.CalendarDate(2000, date.Jun, 30)),
-      #(#(2000, date.Jul, 32), date.CalendarDate(2000, date.Jul, 31)),
-      #(#(2000, date.Aug, 32), date.CalendarDate(2000, date.Aug, 31)),
-      #(#(2000, date.Sep, 31), date.CalendarDate(2000, date.Sep, 30)),
-      #(#(2000, date.Oct, 32), date.CalendarDate(2000, date.Oct, 31)),
-      #(#(2000, date.Nov, 31), date.CalendarDate(2000, date.Nov, 30)),
-      #(#(2000, date.Dec, 32), date.CalendarDate(2000, date.Dec, 31)),
+      #(#(2000, date.Jan, -1), t.CalendarDate(2000, date.Jan, 1)),
+      #(#(2000, date.Jan, 0), t.CalendarDate(2000, date.Jan, 1)),
+      #(#(2000, date.Jan, 32), t.CalendarDate(2000, date.Jan, 31)),
+      #(#(2000, date.Feb, 0), t.CalendarDate(2000, date.Feb, 1)),
+      #(#(2001, date.Feb, 29), t.CalendarDate(2001, date.Feb, 28)),
+      #(#(2000, date.Feb, 30), t.CalendarDate(2000, date.Feb, 29)),
+      #(#(2000, date.Mar, 32), t.CalendarDate(2000, date.Mar, 31)),
+      #(#(2000, date.Apr, 31), t.CalendarDate(2000, date.Apr, 30)),
+      #(#(2000, date.May, 32), t.CalendarDate(2000, date.May, 31)),
+      #(#(2000, date.Jun, 31), t.CalendarDate(2000, date.Jun, 30)),
+      #(#(2000, date.Jul, 32), t.CalendarDate(2000, date.Jul, 31)),
+      #(#(2000, date.Aug, 32), t.CalendarDate(2000, date.Aug, 31)),
+      #(#(2000, date.Sep, 31), t.CalendarDate(2000, date.Sep, 30)),
+      #(#(2000, date.Oct, 32), t.CalendarDate(2000, date.Oct, 31)),
+      #(#(2000, date.Nov, 31), t.CalendarDate(2000, date.Nov, 30)),
+      #(#(2000, date.Dec, 32), t.CalendarDate(2000, date.Dec, 31)),
     ],
     fn(tuple) {
       date.from_calendar_date({ tuple.0 }.0, { tuple.0 }.1, { tuple.0 }.2)
@@ -1668,10 +1667,10 @@ pub fn from_calendar_date_test() {
 pub fn from_week_date_test() {
   list.each(
     [
-      #(#(2000, -1, date.Mon), date.WeekDate(2000, 1, date.Mon)),
-      #(#(2000, 0, date.Mon), date.WeekDate(2000, 1, date.Mon)),
-      #(#(2000, 53, date.Mon), date.WeekDate(2000, 52, date.Mon)),
-      #(#(2004, 54, date.Mon), date.WeekDate(2004, 53, date.Mon)),
+      #(#(2000, -1, date.Mon), t.WeekDate(2000, 1, date.Mon)),
+      #(#(2000, 0, date.Mon), t.WeekDate(2000, 1, date.Mon)),
+      #(#(2000, 53, date.Mon), t.WeekDate(2000, 52, date.Mon)),
+      #(#(2004, 54, date.Mon), t.WeekDate(2004, 53, date.Mon)),
     ],
     fn(tuple) {
       date.from_week_date({ tuple.0 }.0, { tuple.0 }.1, { tuple.0 }.2)
@@ -2056,7 +2055,7 @@ pub fn year_test() {
 //         (date |> Date.year)
 //         (date |> Date.ordinalDay)
 fn to_ordinal_date(date: Date) {
-  date.OrdinalDate(year: date.year(date), ordinal_day: date.ordinal_day(date))
+  t.OrdinalDate(year: date.year(date), ordinal_day: date.ordinal_day(date))
 }
 
 // type alias CalendarDate =
@@ -2065,7 +2064,7 @@ fn to_ordinal_date(date: Date) {
 // fromCalendarDate : CalendarDate -> Date
 // fromCalendarDate { year, month, day } =
 //     Date.fromCalendarDate year month day
-fn from_calendar_date(date: CalendarDate) -> date.Date {
+fn from_calendar_date(date: t.CalendarDate) -> date.Date {
   date.from_calendar_date(date.year, date.month, date.day)
 }
 
@@ -2075,8 +2074,8 @@ fn from_calendar_date(date: CalendarDate) -> date.Date {
 //         (date |> Date.year)
 //         (date |> Date.month)
 //         (date |> Date.day)
-fn to_calendar_date(date: date.Date) -> CalendarDate {
-  CalendarDate(date.year(date), date.month(date), date.day(date))
+fn to_calendar_date(date: date.Date) -> t.CalendarDate {
+  t.CalendarDate(date.year(date), date.month(date), date.day(date))
 }
 
 // type alias WeekDate =
@@ -2085,8 +2084,8 @@ fn to_calendar_date(date: date.Date) -> CalendarDate {
 // fromWeekDate : WeekDate -> Date
 // fromWeekDate { weekYear, weekNumber, weekday } =
 //     Date.fromWeekDate weekYear weekNumber weekday
-fn from_week_date(week_date: WeekDate) -> Date {
-  let WeekDate(week_year, week_number, weekday) = week_date
+fn from_week_date(week_date: t.WeekDate) -> Date {
+  let t.WeekDate(week_year, week_number, weekday) = week_date
   date.from_week_date(week_year, week_number, weekday)
 }
 
@@ -2096,8 +2095,8 @@ fn from_week_date(week_date: WeekDate) -> Date {
 //         (date |> Date.weekYear)
 //         (date |> Date.weekNumber)
 //         (date |> Date.weekday)
-fn to_week_date(date: Date) -> WeekDate {
-  date.WeekDate(
+fn to_week_date(date: Date) -> t.WeekDate {
+  t.WeekDate(
     week_year: date.week_year(date),
     week_number: date.week_number(date),
     weekday: date.weekday(date),
@@ -2112,7 +2111,7 @@ fn to_week_date(date: Date) -> WeekDate {
 //         |> List.concatMap
 //             (\m -> List.range 1 (daysInMonth y m) |> List.map (CalendarDate y m))
 
-fn calendar_dates_in_year(year: Int) -> List(CalendarDate) {
+fn calendar_dates_in_year(year: Int) -> List(t.CalendarDate) {
   [
     date.Jan,
     date.Feb,
@@ -2128,8 +2127,8 @@ fn calendar_dates_in_year(year: Int) -> List(CalendarDate) {
     date.Dec,
   ]
   |> list.map(fn(month) {
-    list.range(1, date.days_in_month(year, month))
-    |> list.map(fn(day) { CalendarDate(year, month, day) })
+    list.range(1, t.days_in_month(year, month))
+    |> list.map(fn(day) { t.CalendarDate(year, month, day) })
   })
   |> list.concat
 }
@@ -2148,7 +2147,7 @@ fn calendar_dates_in_year(year: Int) -> List(CalendarDate) {
 //             if isLeapYear y then
 //                 29
 
-//             else
+// else
 //                 28
 
 //         Mar ->

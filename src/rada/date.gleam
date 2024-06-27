@@ -27,82 +27,82 @@ import rada/date/pattern.{type Token, Field, Literal}
 //     , compare, isBetween, min, max, clamp
 //     , monthToNumber, numberToMonth, weekdayToNumber, numberToWeekday
 //     )
-// 
+//
 // {-|
-// 
+//
 // @docs Date
-// 
+//
 // @docs Month, Weekday
-// 
-// 
+//
+//
 // # Create
-// 
+//
 // @docs today, fromPosix, fromCalendarDate, fromWeekDate, fromOrdinalDate, fromIsoString, fromRataDie
-// 
-// 
+//
+//
 // # Convert
-// 
+//
 // @docs toIsoString, toRataDie
-// 
-// 
+//
+//
 // # Extract
-// 
+//
 // @docs year, month, day, weekYear, weekNumber, weekday, ordinalDay, quarter, monthNumber, weekdayNumber
-// 
-// 
+//
+//
 // # Format
-// 
+//
 // @docs format, withOrdinalSuffix
-// 
-// 
+//
+//
 // ## Custom Languages
-// 
+//
 // @docs Language, formatWithLanguage
-// 
-// 
+//
+//
 // # Arithmetic
-// 
+//
 // @docs Unit, add, diff
-// 
-// 
+//
+//
 // # Rounding
-// 
+//
 // @docs Interval, ceiling, floor
-// 
-// 
+//
+//
 // # Lists
-// 
+//
 // @docs range
-// 
-// 
+//
+//
 // # Ordering
-// 
+//
 // @docs compare, isBetween, min, max, clamp
-// 
-// 
+//
+//
 // # Month and Weekday helpers
-// 
+//
 // @docs monthToNumber, numberToMonth, weekdayToNumber, numberToWeekday
-// 
+//
 // -}
-// 
+//
 // import Parser exposing ((|.), (|=), Parser)
 // import Pattern exposing (Token(..))
 // import Task exposing (Task)
 // import Time exposing (Month(..), Posix, Weekday(..))
-// 
-// 
+//
+//
 // {-| The `Month` type used in this package is an alias of [`Month`][timemonth]
 // from `elm/time`. To express literal values, like `Jan`, you must import them
 // from `Time`.
-// 
+//
 //     import Date
 //     import Time exposing (Month(..))
-// 
+//
 //     Date.fromCalendarDate 2020 Jan 1
-// 
+//
 // [timemonth]: https://package.elm-lang.org/packages/elm/time/latest/Time#Month
-// 
+//
 // -}
 // type alias Month =
 //     Time.Month
