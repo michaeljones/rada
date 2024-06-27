@@ -486,7 +486,7 @@ pub fn from_week_date(
 // 
 //     else
 //         Ok <| RD <| daysBeforeYear y + od
-pub fn from_ordinal_parts(year: Int, ordinal: Int) -> Result(Date, String) {
+fn from_ordinal_parts(year: Int, ordinal: Int) -> Result(Date, String) {
   let days_in_year = case is_leap_year(year) {
     True -> 366
     False -> 365
@@ -541,7 +541,7 @@ pub fn from_ordinal_parts(year: Int, ordinal: Int) -> Result(Date, String) {
 // 
 //     else
 //         Ok <| RD <| daysBeforeYear y + daysBeforeMonth y (mn |> numberToMonth) + d
-pub fn from_calendar_parts(
+fn from_calendar_parts(
   year: Int,
   month_number: Int,
   day: Int,
@@ -639,7 +639,7 @@ pub fn from_calendar_parts(
 // 
 //     else
 //         Ok <| RD <| daysBeforeWeekYear wy + (wn - 1) * 7 + wdn
-pub fn from_week_parts(
+fn from_week_parts(
   week_year: Int,
   week_number: Int,
   weekday_number: Int,
@@ -712,11 +712,11 @@ pub fn from_week_parts(
 //     { year = y
 //     , ordinalDay = rd - daysBeforeYear y
 //     }
-pub type OrdinalDate {
+type OrdinalDate {
   OrdinalDate(year: Int, ordinal_day: Int)
 }
 
-pub fn to_ordinal_date(date: Date) -> OrdinalDate {
+fn to_ordinal_date(date: Date) -> OrdinalDate {
   let RD(rd) = date
   let year_ = year(date)
 
@@ -733,11 +733,11 @@ pub fn to_ordinal_date(date: Date) -> OrdinalDate {
 //             RD rd |> toOrdinalDate
 //     in
 //     toCalendarDateHelp date.year Jan date.ordinalDay
-pub type CalendarDate {
+type CalendarDate {
   CalendarDate(year: Int, month: Month, day: Int)
 }
 
-pub fn to_calendar_date(date: Date) -> CalendarDate {
+fn to_calendar_date(date: Date) -> CalendarDate {
   let ordinal_date = to_ordinal_date(date)
 
   to_calendar_date_helper(ordinal_date.year, Jan, ordinal_date.ordinal_day)
@@ -805,11 +805,11 @@ fn to_calendar_date_helper(
 //     , weekday = wdn |> numberToWeekday
 //     }
 
-pub type WeekDate {
+type WeekDate {
   WeekDate(week_year: Int, week_number: Int, weekday: Weekday)
 }
 
-pub fn to_week_date(date: Date) {
+fn to_week_date(date: Date) {
   let RD(rd) = date
   let weekday_number_ = weekday_number(date)
   let week_year = year(RD(rd + { 4 - weekday_number_ }))
@@ -2787,7 +2787,7 @@ pub fn clamp(value: Date, lower: Date, upper: Date) -> Date {
 // 
 //         Dec ->
 //             31
-pub fn days_in_month(year: Int, month: Month) -> Int {
+fn days_in_month(year: Int, month: Month) -> Int {
   case month {
     Jan -> 31
     Feb ->
