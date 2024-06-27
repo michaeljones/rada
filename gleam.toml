@@ -16,8 +16,8 @@ repository = { type = "github", user = "michaeljones", repo = "rada" }
 # https://gleam.run/writing-gleam/gleam-toml/.
 
 internal_modules = [
-  "rada/parse",
-  "rada/pattern",
+  "rada/date/parse",
+  "rada/date/pattern",
 ]
 
 [dependencies]
