@@ -9,8 +9,8 @@ import gleam/string
 import nibble
 import nibble/lexer as nibble_lexer
 
-import date/parse.{Dash, Digit, TimeToken, WeekToken} as days_parse
-import date/pattern.{type Token, Field, Literal}
+import rada/date/parse.{Dash, Digit, TimeToken, WeekToken} as days_parse
+import rada/date/pattern.{type Token, Field, Literal}
 
 // module Date exposing
 
@@ -787,7 +787,7 @@ fn to_calendar_date_helper(
 // 
 // 
 // {-| -}
-// toWeekDate : Date -> { weekYear : Int, weekNumber : Int, weekday : Weekday }
+// toWeekDate :dd Date -> { weekYear : Int, weekNumber : Int, weekday : Weekday }
 // toWeekDate (RD rd) =
 //     let
 //         wdn =
@@ -2593,8 +2593,8 @@ pub fn today() -> Date {
   from_calendar_date(year, number_to_month(month_number), day)
 }
 
-@external(erlang, "date_ffi", "get_year_month_day")
-@external(javascript, "./date_ffi.mjs", "get_year_month_day")
+@external(erlang, "rada_ffi", "get_year_month_day")
+@external(javascript, "../rada_ffi.mjs", "get_year_month_day")
 fn get_year_month_day() -> #(Int, Int, Int)
 
 // 

@@ -1,7 +1,7 @@
 import gleam/int
 import gleam/string
 
-import date
+import rada/date
 
 // fr : Date.Language
 // fr =

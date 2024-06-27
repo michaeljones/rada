@@ -3,8 +3,8 @@ import gleam/result
 import gleeunit/should
 import nibble/lexer as nl
 
-import date
-import date/parse as dp
+import rada/date
+import rada/date/parse as dp
 
 pub fn lex_ordinal_date_test() {
   nl.run("2019-269", dp.lexer())

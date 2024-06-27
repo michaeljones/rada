@@ -4,8 +4,10 @@ import gleam/result
 import gleeunit
 import gleeunit/should
 
-import date.{type CalendarDate, type Date, type WeekDate, CalendarDate, WeekDate}
 import french_language.{language_fr}
+import rada/date.{
+  type CalendarDate, type Date, type WeekDate, CalendarDate, WeekDate,
+}
 
 pub fn main() {
   gleeunit.main()
