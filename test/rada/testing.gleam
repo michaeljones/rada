@@ -39,7 +39,7 @@ pub fn days_in_month(year: Int, month: Month) -> Int {
   }
 }
 
-pub fn is_leap_year(year: Int) -> Bool {
+fn is_leap_year(year: Int) -> Bool {
   modulo_unwrap(year, 4) == 0
   && modulo_unwrap(year, 100) != 0
   || modulo_unwrap(year, 400) == 0
