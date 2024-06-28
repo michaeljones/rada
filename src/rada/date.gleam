@@ -1405,29 +1405,6 @@ fn range_help(
   }
 }
 
-// Posix
-// 
-// 
-// {-| Create a date from a time [`Zone`][zone] and a [`Posix`][posix] time. This
-// conversion loses the time information associated with the `Posix` value.
-// 
-//     import Date exposing (fromCalendarDate, fromPosix)
-//     import Time exposing (millisToPosix, utc, Month(..))
-// 
-//     fromPosix utc (millisToPosix 0)
-//         == fromCalendarDate 1970 Jan 1
-// 
-// [zone]: https://package.elm-lang.org/packages/elm/time/latest/Time#Zone
-// [posix]: https://package.elm-lang.org/packages/elm/time/latest/Time#Posix
-// 
-// -}
-// fromPosix : Time.Zone -> Posix -> Date
-// fromPosix zone posix =
-//     fromCalendarDate
-//         (posix |> Time.toYear zone)
-//         (posix |> Time.toMonth zone)
-//         (posix |> Time.toDay zone)
-
 /// Get the current local date
 pub fn today() -> Date {
   let #(year, month_number, day) = get_year_month_day()
@@ -1574,8 +1551,7 @@ fn days_before_month(year: Int, month: Month) -> Int {
 }
 
 // Month and weekday numbers
- 
- 
+
 /// Converts the month values `Jan`–`Dec` to 1–12.
 pub fn month_to_number(month: Month) -> Int {
   case month {
