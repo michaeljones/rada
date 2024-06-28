@@ -1,3 +1,11 @@
+//// This module provides a simple [`Date`](#Date) type for working with dates without times or zones.
+////
+//// The module uses the [Rata Die][ratadie] system to represent dates in the standard Gregorian Calendar.
+//// The number 1 represents the date **1 January 0001** and all other dates are represented as positive
+//// or negative numbers relative to that date.
+////
+//// [ratadie]: https://en.wikipedia.org/wiki/Rata_Die
+
 import gleam/bool
 import gleam/float
 import gleam/int
