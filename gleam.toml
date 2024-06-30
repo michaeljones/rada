@@ -1,5 +1,5 @@
 name = "rada"
-version = "0.1.0"
+version = "0.2.0"
 description = "A library for dates with no times or time zones"
 licences = ["BSD-3-Clause"]
 repository = { type = "github", user = "michaeljones", repo = "rada" }
