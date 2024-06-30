@@ -15,5 +15,22 @@ gleam add rada
 
 ## Usage
 
+```gleam
+import gleam/io
+import gleam/list
+
+import rada/date
+
+pub fn main() {
+  let today = date.today()
+  let one_week_later = date.add(today, 1, date.Weeks)
+
+  date.range(date.Day, 1, today, one_week_later)
+  |> list.each(fn(entry)
+    date.format(entry, "EEEE, d MMMM y") |> io.println
+  })
+}
+```
+
 Documentation can be found at <https://hexdocs.pm/rada>.
 
