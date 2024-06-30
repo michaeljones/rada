@@ -1160,7 +1160,7 @@ pub type Unit {
 /// Get a past or future date by adding a number of units to a date.
 /// 
 /// ```gleam
-/// add(Weeks, -2, from_calendar_date(2018, Sep, 26))
+/// add(from_calendar_date(2018, Sep, 26), -2, Weeks)
 ///     == from_calendar_date(2018, Sep, 12)
 /// ```
 /// 
@@ -1168,7 +1168,7 @@ pub type Unit {
 /// month if necessary.
 /// 
 /// ```gleam
-/// add(Months, 1, from_calendar_date(2000, Jan, 31))
+/// add(from_calendar_date(2000, Jan, 31), 1, Months)
 ///     == from_calendar_date(2000, Feb, 29)
 /// ```
 pub fn add(date: Date, count: Int, unit: Unit) -> Date {
@@ -1273,7 +1273,7 @@ fn days_since_previous_weekday(weekday: Weekday, date: Date) -> Int {
 /// date will be less than or equal to the one provided.
 /// 
 /// ```gleam
-/// floor(Tuesday, from_calendar_date(2018, May, 11))
+/// floor(from_calendar_date(2018, May, 11), Tuesday)
 ///         == from_calendar_date(2018, May, 8)
 /// ```
 pub fn floor(date: Date, interval: Interval) -> Date {
@@ -1335,7 +1335,7 @@ fn interval_to_units(interval: Interval) -> #(Int, Unit) {
 /// date will be greater than or equal to the one provided.
 /// 
 /// ```gleam
-/// ceiling(Tuesday, from_calendar_date(2018, May, 11))
+/// ceiling(from_calendar_date(2018, May, 11), Tuesday)
 ///     == from_calendar_date(2018, May, 15)
 /// ```
 pub fn ceiling(date: Date, interval: Interval) -> Date {
@@ -1440,7 +1440,7 @@ pub fn compare(date1: Date, date2: Date) -> Order {
 /// let minimum = from_ordinal_date(1970, 1)
 /// let maximum = from_ordinal_date(2038, 1)
 /// 
-/// is_between(minimum, maximum, from_ordinal_date(1969, 201))
+/// is_between(from_ordinal_date(1969, 201), minimum, maximum)
 ///     == False
 /// ```
 pub fn is_between(value: Date, lower: Date, upper: Date) -> Bool {
