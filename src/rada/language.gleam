@@ -1,9 +1,14 @@
+//// This module provides [`Language`](date.html#Language) definitions for use with the
+//// [format_with_language](date.html#format_with_language) function.
+
 import gleam/int
+
 import rada/date.{
   type Language, type Month, type Weekday, Apr, Aug, Dec, Feb, Jan, Jul, Jun,
   Mar, May, Nov, Oct, Sep,
 }
 
+/// Italian [`Language`](date.html#Language) definition for use with the [format_with_language](date.html#format_with_language) function.
 pub fn italian() -> Language {
   date.Language(
     month_name: month_name_it,
