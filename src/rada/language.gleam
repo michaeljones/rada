@@ -57,8 +57,8 @@ fn weekday_name_it(weekday: Weekday) -> String {
   case weekday {
     date.Mon -> "lunedì"
     date.Tue -> "martedì"
-    date.Thu -> "mercoledì"
-    date.Wed -> "giovedì"
+    date.Wed -> "mercoledì"
+    date.Thu -> "giovedì"
     date.Fri -> "venerdì"
     date.Sat -> "sabato"
     date.Sun -> "domenica"
@@ -69,8 +69,8 @@ fn weekday_name_short_it(weekday: Weekday) -> String {
   case weekday {
     date.Mon -> "lun"
     date.Tue -> "mar"
-    date.Thu -> "mer"
-    date.Wed -> "gio"
+    date.Wed -> "mer"
+    date.Thu -> "gio"
     date.Fri -> "ven"
     date.Sat -> "sab"
     date.Sun -> "dom"
