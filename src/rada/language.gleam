@@ -80,3 +80,76 @@ fn weekday_name_short_it(weekday: Weekday) -> String {
 fn day_with_suffix_it(day: Int) -> String {
   int.to_string(day)
 }
+
+/// German [`Language`](date.html#Language) definition for use with the [format_with_language](date.html#format_with_language) function.
+pub fn german() -> Language {
+  date.Language(
+    month_name: month_name_de,
+    month_name_short: month_name_short_de,
+    weekday_name: weekday_name_de,
+    weekday_name_short: weekday_name_short_de,
+    day_with_suffix: day_with_suffix_de,
+  )
+}
+
+fn month_name_de(month: Month) -> String {
+  case month {
+    Jan -> "Januar"
+    Feb -> "Februar"
+    Mar -> "März"
+    Apr -> "April"
+    May -> "Mai"
+    Jun -> "Juni"
+    Jul -> "Juli"
+    Aug -> "August"
+    Sep -> "September"
+    Oct -> "Oktober"
+    Nov -> "November"
+    Dec -> "Dezember"
+  }
+}
+
+fn month_name_short_de(month: Month) -> String {
+  case month {
+    Jan -> "Jan."
+    Feb -> "Feb."
+    Mar -> "Mär."
+    Apr -> "Apr."
+    May -> "Mai"
+    Jun -> "Jun."
+    Jul -> "Jul."
+    Aug -> "Aug."
+    Sep -> "Sep."
+    Oct -> "Okt."
+    Nov -> "Nov."
+    Dec -> "Dez."
+  }
+}
+
+fn weekday_name_de(weekday: Weekday) -> String {
+  case weekday {
+    date.Mon -> "Montag"
+    date.Tue -> "Dienstag"
+    date.Wed -> "Mittwoch"
+    date.Thu -> "Donnerstag"
+    date.Fri -> "Freitag"
+    date.Sat -> "Samstag"
+    date.Sun -> "Sonntag"
+  }
+}
+
+fn weekday_name_short_de(weekday: Weekday) -> String {
+  case weekday {
+    date.Mon -> "Mo."
+    date.Tue -> "Di."
+    date.Wed -> "Mi."
+    date.Thu -> "Do."
+    date.Fri -> "Fr."
+    date.Sat -> "Sa."
+    date.Sun -> "So."
+  }
+}
+
+fn day_with_suffix_de(day: Int) -> String {
+  int.to_string(day) <> "."
+}
