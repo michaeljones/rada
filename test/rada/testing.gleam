@@ -1,9 +1,6 @@
 //// Module of helper functions and types duplicated from within the main date implementation
 //// because we don't want to expose them publicly but want to use them in tests.
 
-import gleam/int
-import gleam/result
-
 import rada/date.{type Month, type Weekday}
 
 pub type CalendarDate {
@@ -45,6 +42,12 @@ fn is_leap_year(year: Int) -> Bool {
   || modulo_unwrap(year, 400) == 0
 }
 
-fn modulo_unwrap(a: Int, b: Int) -> Int {
-  int.modulo(a, b) |> result.unwrap(0)
+/// This is the implementation of int.modulo but unwrapped with the knowledge that the
+/// the divisor is never zero in our calculations
+fn modulo_unwrap(dividend: Int, divisor: Int) -> Int {
+  let remainder = dividend % divisor
+  case { remainder > 0 && divisor < 0 } || { remainder < 0 && divisor > 0 } {
+    True -> remainder + divisor
+    False -> remainder
+  }
 }
