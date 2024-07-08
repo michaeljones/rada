@@ -2,6 +2,7 @@
 //// [format_with_language](date.html#format_with_language) function.
 
 import gleam/int
+import gleam/string
 
 import rada/date.{
   type Language, type Month, type Weekday, Apr, Aug, Dec, Feb, Jan, Jul, Jun,
@@ -110,20 +111,8 @@ fn month_name_de(month: Month) -> String {
 }
 
 fn month_name_short_de(month: Month) -> String {
-  case month {
-    Jan -> "Jan."
-    Feb -> "Feb."
-    Mar -> "Mär."
-    Apr -> "Apr."
-    May -> "Mai"
-    Jun -> "Jun."
-    Jul -> "Jul."
-    Aug -> "Aug."
-    Sep -> "Sep."
-    Oct -> "Okt."
-    Nov -> "Nov."
-    Dec -> "Dez."
-  }
+  month_name_de(month)
+  |> string.slice(0, 3)
 }
 
 fn weekday_name_de(weekday: Weekday) -> String {
@@ -139,15 +128,8 @@ fn weekday_name_de(weekday: Weekday) -> String {
 }
 
 fn weekday_name_short_de(weekday: Weekday) -> String {
-  case weekday {
-    date.Mon -> "Mo."
-    date.Tue -> "Di."
-    date.Wed -> "Mi."
-    date.Thu -> "Do."
-    date.Fri -> "Fr."
-    date.Sat -> "Sa."
-    date.Sun -> "So."
-  }
+  weekday_name_de(weekday)
+  |> string.slice(0, 2)
 }
 
 fn day_with_suffix_de(day: Int) -> String {
