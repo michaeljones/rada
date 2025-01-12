@@ -19,7 +19,7 @@ pub fn main() {
 // }
 
 pub fn calendar_date_test() {
-  list.concat([
+  list.flatten([
     list.range(1897, 1905),
     list.range(1997, 2025),
     list.range(-5, 5),
@@ -27,7 +27,7 @@ pub fn calendar_date_test() {
     list.range(-405, -395),
   ])
   |> list.map(calendar_dates_in_year)
-  |> list.concat
+  |> list.flatten
   |> list.each(fn(date) {
     expect_isomorphism(from_calendar_date, to_calendar_date, date)
   })
@@ -40,7 +40,7 @@ pub fn rata_die_test() {
     |> calendar_dates_in_year
     |> list.map(fn(date) { date |> from_calendar_date |> date.to_rata_die })
   })
-  |> list.concat
+  |> list.flatten
   |> should.equal(list.range(
     date.from_calendar_date(1997, date.Jan, 1) |> date.to_rata_die,
     date.from_calendar_date(2025, date.Dec, 31) |> date.to_rata_die,
@@ -54,9 +54,9 @@ pub fn weekday_number_test() {
 }
 
 pub fn week_date_isomorphic_test() {
-  list.concat([list.range(1997, 2025), list.range(-5, 5)])
+  list.flatten([list.range(1997, 2025), list.range(-5, 5)])
   |> list.map(calendar_dates_in_year)
-  |> list.concat
+  |> list.flatten
   |> list.each(fn(date) {
     expect_isomorphism(to_week_date, from_week_date, from_calendar_date(date))
   })
@@ -781,13 +781,13 @@ pub fn from_iso_string_errors_describing_only_one_parser_dead_end_test() {
 }
 
 pub fn from_iso_string_can_form_an_isomorphism_with_to_iso_string_test() {
-  list.concat([
+  list.flatten([
     list.range(1897, 1905),
     list.range(1997, 2025),
     list.range(-5, 5),
   ])
   |> list.map(calendar_dates_in_year)
-  |> list.concat
+  |> list.flatten
   |> list.each(fn(date) {
     expect_isomorphism(
       fn(val) { val |> result.map(date.to_iso_string) },
@@ -798,9 +798,9 @@ pub fn from_iso_string_can_form_an_isomorphism_with_to_iso_string_test() {
 }
 
 pub fn from_iso_string_can_form_an_isomorphism_with_format_yyyy_ddd_test() {
-  list.concat([list.range(1997, 2005), list.range(-5, 5)])
+  list.flatten([list.range(1997, 2005), list.range(-5, 5)])
   |> list.map(calendar_dates_in_year)
-  |> list.concat
+  |> list.flatten
   |> list.each(fn(date) {
     expect_isomorphism(
       fn(val) { val |> result.map(fn(date) { date.format(date, "yyyy-DDD") }) },
@@ -811,9 +811,9 @@ pub fn from_iso_string_can_form_an_isomorphism_with_format_yyyy_ddd_test() {
 }
 
 pub fn from_iso_string_can_form_an_isomorphism_with_format_yyyy_w_www_e_test() {
-  list.concat([list.range(1997, 2005), list.range(-5, 5)])
+  list.flatten([list.range(1997, 2005), list.range(-5, 5)])
   |> list.map(calendar_dates_in_year)
-  |> list.concat
+  |> list.flatten
   |> list.each(fn(date) {
     expect_isomorphism(
       fn(val) {
@@ -834,7 +834,7 @@ pub fn from_ordinal_date_test() {
       #(#(2000, 367), t.OrdinalDate(2000, 366)),
     ],
     fn(tuple) {
-      date.from_ordinal_date({ tuple.0 }.0, { tuple.0 }.1)
+      date.from_ordinal_date(tuple.0.0, tuple.0.1)
       |> to_ordinal_date
       |> should.equal(tuple.1)
     },
@@ -862,7 +862,7 @@ pub fn from_calendar_date_test() {
       #(#(2000, date.Dec, 32), t.CalendarDate(2000, date.Dec, 31)),
     ],
     fn(tuple) {
-      date.from_calendar_date({ tuple.0 }.0, { tuple.0 }.1, { tuple.0 }.2)
+      date.from_calendar_date(tuple.0.0, tuple.0.1, tuple.0.2)
       |> to_calendar_date
       |> should.equal(tuple.1)
     },
@@ -878,7 +878,7 @@ pub fn from_week_date_test() {
       #(#(2004, 54, date.Mon), t.WeekDate(2004, 53, date.Mon)),
     ],
     fn(tuple) {
-      date.from_week_date({ tuple.0 }.0, { tuple.0 }.1, { tuple.0 }.2)
+      date.from_week_date(tuple.0.0, tuple.0.1, tuple.0.2)
       |> to_week_date
       |> should.equal(tuple.1)
     },
@@ -956,7 +956,7 @@ pub fn is_between_with_min_less_than_max_test() {
       #("after", #(a, b, c), False),
     ],
     fn(tuple) {
-      date.is_between({ tuple.1 }.2, { tuple.1 }.0, { tuple.1 }.1)
+      date.is_between(tuple.1.2, tuple.1.0, tuple.1.1)
       |> should.equal(tuple.2)
     },
   )
@@ -976,7 +976,7 @@ pub fn is_between_with_min_equal_than_max_test() {
       #("after", #(b, b, c), False),
     ],
     fn(tuple) {
-      date.is_between({ tuple.1 }.2, { tuple.1 }.0, { tuple.1 }.1)
+      date.is_between(tuple.1.2, tuple.1.0, tuple.1.1)
       |> should.equal(tuple.2)
     },
   )
@@ -998,7 +998,7 @@ pub fn is_between_with_min_greater_than_than_max_test() {
       #("after", #(b, a, c), False),
     ],
     fn(tuple) {
-      date.is_between({ tuple.1 }.2, { tuple.1 }.0, { tuple.1 }.1)
+      date.is_between(tuple.1.2, tuple.1.0, tuple.1.1)
       |> should.equal(tuple.2)
     },
   )
@@ -1040,7 +1040,7 @@ pub fn clamp_with_min_less_than_max_test() {
       #("after", #(a, b, c), b),
     ],
     fn(tuple) {
-      date.clamp({ tuple.1 }.2, { tuple.1 }.0, { tuple.1 }.1)
+      date.clamp(tuple.1.2, tuple.1.0, tuple.1.1)
       |> should.equal(tuple.2)
     },
   )
@@ -1060,7 +1060,7 @@ pub fn clamp_with_min_equals_max_test() {
       #("after", #(b, b, c), b),
     ],
     fn(tuple) {
-      date.clamp({ tuple.1 }.2, { tuple.1 }.0, { tuple.1 }.1)
+      date.clamp(tuple.1.2, tuple.1.0, tuple.1.1)
       |> should.equal(tuple.2)
     },
   )
@@ -1138,7 +1138,7 @@ fn calendar_dates_in_year(year: Int) -> List(t.CalendarDate) {
     list.range(1, t.days_in_month(year, month))
     |> list.map(fn(day) { t.CalendarDate(year, month, day) })
   })
-  |> list.concat
+  |> list.flatten
 }
 
 // Expectations

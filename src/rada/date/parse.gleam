@@ -1,4 +1,4 @@
-import gleam/regex
+import gleam/regexp
 import nibble/lexer as nl
 
 pub type ParseDateToken {
@@ -10,9 +10,9 @@ pub type ParseDateToken {
 }
 
 pub fn lexer() {
-  let options = regex.Options(case_insensitive: False, multi_line: True)
-  let assert Ok(digits_regex) = regex.compile("^[0-9]+$", options)
-  let is_digits = fn(str) { regex.check(digits_regex, str) }
+  let options = regexp.Options(case_insensitive: False, multi_line: True)
+  let assert Ok(digits_regex) = regexp.compile("^[0-9]+$", options)
+  let is_digits = fn(str) { regexp.check(digits_regex, str) }
 
   nl.simple([
     nl.custom(fn(mode, lexeme, _next_grapheme) {

@@ -6,7 +6,6 @@
 ////
 //// [ratadie]: https://en.wikipedia.org/wiki/Rata_Die
 
-import gleam/bool
 import gleam/float
 import gleam/int
 import gleam/list
@@ -530,7 +529,7 @@ fn format_field(
           date
           |> year
           |> int.to_string
-          |> string.pad_left(2, "0")
+          |> string.pad_start(2, "0")
           |> string_take_right(2)
 
         _ ->
@@ -545,7 +544,7 @@ fn format_field(
           date
           |> week_year
           |> int.to_string
-          |> string.pad_left(2, "0")
+          |> string.pad_start(2, "0")
           |> string_take_right(2)
 
         _ ->
@@ -596,7 +595,7 @@ fn format_field(
           date
           |> month_number
           |> int.to_string
-          |> string.pad_left(2, "0")
+          |> string.pad_start(2, "0")
 
         3 ->
           date
@@ -627,7 +626,7 @@ fn format_field(
           date
           |> week_number
           |> int.to_string
-          |> string.pad_left(2, "0")
+          |> string.pad_start(2, "0")
 
         _ -> ""
       }
@@ -643,7 +642,7 @@ fn format_field(
           date
           |> day
           |> int.to_string
-          |> string.pad_left(2, "0")
+          |> string.pad_start(2, "0")
 
         // non-standard
         3 ->
@@ -665,13 +664,13 @@ fn format_field(
           date
           |> ordinal_day
           |> int.to_string
-          |> string.pad_left(2, "0")
+          |> string.pad_start(2, "0")
 
         3 ->
           date
           |> ordinal_day
           |> int.to_string
-          |> string.pad_left(3, "0")
+          |> string.pad_start(3, "0")
 
         _ -> ""
       }
@@ -1028,7 +1027,7 @@ fn parse_day_of_year() {
 fn parse_month_and_day(extended: Bool) {
   use month <- nibble.do(int_2())
 
-  let dash_count = bool.to_int(extended)
+  let dash_count = bool_to_int(extended)
 
   use day <- nibble.do(
     nibble.one_of([
@@ -1055,7 +1054,7 @@ fn parse_week_and_weekday(extended: Bool) {
 
   use week <- nibble.do(int_2())
 
-  let dash_count = bool.to_int(extended)
+  let dash_count = bool_to_int(extended)
 
   use day <- nibble.do(
     nibble.one_of([
@@ -1533,7 +1532,7 @@ fn days_in_month(year: Int, month: Month) -> Int {
 }
 
 fn days_before_month(year: Int, month: Month) -> Int {
-  let leap_days = bool.to_int(is_leap_year(year))
+  let leap_days = bool_to_int(is_leap_year(year))
   case month {
     Jan -> 0
     Feb -> 31
@@ -1626,7 +1625,7 @@ fn pad_signed_int(value: Int, length: Int) -> String {
     value
     |> int.absolute_value
     |> int.to_string
-    |> string.pad_left(length, "0")
+    |> string.pad_start(length, "0")
 
   prefix <> suffix
 }
@@ -1659,4 +1658,11 @@ fn modulo_unwrap(dividend: Int, divisor: Int) -> Int {
 
 fn is_between_int(value: Int, lower: Int, upper: Int) -> Bool {
   lower <= value && value <= upper
+}
+
+fn bool_to_int(value: Bool) -> Int {
+  case value {
+    True -> 1
+    False -> 0
+  }
 }
