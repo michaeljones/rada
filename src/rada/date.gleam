@@ -1588,7 +1588,7 @@ pub fn number_to_month(month_number: Int) -> Month {
 }
 
 /// Converts the weekday values `Mon`–`Sun` to 1–7.
-fn weekday_to_number(weekday: Weekday) -> Int {
+pub fn weekday_to_number(weekday: Weekday) -> Int {
   case weekday {
     Mon -> 1
     Tue -> 2
