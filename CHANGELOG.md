@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.6.0 - 2025-12-16
+
+### Added
+
+- `weekday_to_number` function for converting from a Weekday value to an integer between 1 and 7 with 1 corresponding
+  to Monday.
+
+## 0.5.0 - 2025-01-12
+
+### Changed
+
+- Updated for gleam stdlib changes.
+
 ## 0.4.0 - 2024-07-09
 
 ### Added
